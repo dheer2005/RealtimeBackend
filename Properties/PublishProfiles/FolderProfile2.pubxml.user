@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>D:\Publish</_PublishTargetUrl>
+    <History>True|2025-04-30T13:20:20.5469481Z||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="chatString">
+      <Value>workstation id=chatify_Db.mssql.somee.com%3bpacket size=4096%3buser id=dhirendra2107_SQLLogin_1%3bpwd=riees4q2ys%3bdata source=chatify_Db.mssql.somee.com%3bpersist security info=False%3binitial catalog=chatify_Db%3bTrustServerCertificate=True</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>
