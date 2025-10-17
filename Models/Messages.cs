@@ -14,5 +14,8 @@ namespace RealtimeChat.Models
         public bool IsImage { get; set; } = false;
         public string? MediaUrl { get; set; }
 
+        public int? ReplyToMessageId { get; set; }
+        public Messages? ReplyToMessage { get; set; }
+
     }
 }

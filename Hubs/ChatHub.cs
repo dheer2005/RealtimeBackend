@@ -4,9 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using RealtimeChat.Context;
 using RealtimeChat.Dtos;
 using RealtimeChat.Models;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Runtime.Intrinsics.X86;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -67,7 +64,7 @@ namespace RealtimeChat.Hubs
                ?? string.Empty;
         }
 
-        public async Task SendMessage(string fromUser, string userTo, string message, DateTime created, string status, bool isImage, string mediaUrl)
+        public async Task SendMessage(string fromUser, string userTo, string message, DateTime created, string status, bool isImage, string mediaUrl, int? replyToMessageId)
         {
             if (string.IsNullOrEmpty(fromUser) || string.IsNullOrEmpty(userTo))
                 throw new ArgumentException("Invalid message data");
@@ -80,11 +77,20 @@ namespace RealtimeChat.Hubs
                 Status = "sent", 
                 IsImage = isImage,
                 MediaUrl = mediaUrl,
-                Created = DateTime.UtcNow.AddHours(5.5)
+                Created = DateTime.UtcNow.AddHours(5.5),
+                ReplyToMessageId = replyToMessageId,
             };
 
             _context.Messages.Add(newMessage);
             await _context.SaveChangesAsync();
+
+            Messages? repliedMessage = null;
+            if (replyToMessageId.HasValue)
+            {
+                repliedMessage = await _context.Messages
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m=>m.Id == replyToMessageId.Value);
+            }
 
             var serverMessage = new
             {
@@ -95,7 +101,14 @@ namespace RealtimeChat.Hubs
                 created = newMessage.Created,
                 status = newMessage.Status,
                 isImage = newMessage.IsImage,
-                mediaUrl = newMessage.MediaUrl
+                mediaUrl = newMessage.MediaUrl,
+                replyTo = repliedMessage != null ? new
+                {
+                    id = repliedMessage.Id,
+                    message = repliedMessage.Message,
+                    mediaUrl = repliedMessage.MediaUrl,
+                    isImage = repliedMessage.IsImage
+                } : null
             };
 
             var recipientConnectionId = onlineUsers.Values.FirstOrDefault(u => u.UserName == userTo)?.ConnectionId;
@@ -106,6 +119,35 @@ namespace RealtimeChat.Hubs
             }
 
             await Clients.Caller.SendAsync("ReceiveMessage", serverMessage);
+
+        }
+
+        public async Task DeleteMessage(int messageId)
+        {
+            var message = await _context.Messages.FindAsync(messageId);
+
+            if (message == null)
+                throw new Exception("Message not found");
+
+            var fromUser = message.FromUser;
+            var userTo = message.UserTo;
+
+            _context.Messages.Remove(message);
+            await _context.SaveChangesAsync();
+
+
+            var senderConnectionId = onlineUsers.Values.FirstOrDefault(u => u.UserName == fromUser)?.ConnectionId;
+            var receiverId = onlineUsers.Values.FirstOrDefault(u => u.UserName == userTo)?.ConnectionId;
+
+            if (senderConnectionId != null)
+            {
+                await Clients.Client(senderConnectionId).SendAsync("MessageDeleted", messageId);
+            }
+
+            if (receiverId != null) 
+            {
+                await Clients.Client(receiverId).SendAsync("MessageDeleted", messageId);
+            }
 
         }
 
