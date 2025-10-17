@@ -15,6 +15,13 @@ namespace RealtimeChat.Context
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<SeenUpdate>().HasNoKey();
+
+            builder.Entity<Messages>()
+            .HasOne(m => m.ReplyToMessage)
+            .WithMany() // no collection navigation
+            .HasForeignKey(m => m.ReplyToMessageId)
+            .OnDelete(DeleteBehavior.Restrict);
+
             base.OnModelCreating(builder);
         }
 

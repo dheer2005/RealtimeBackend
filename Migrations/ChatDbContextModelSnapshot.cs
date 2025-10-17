@@ -323,6 +323,9 @@ namespace RealtimeChat.Migrations
                     b.Property<string>("Reactions")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ReplyToMessageId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -332,6 +335,8 @@ namespace RealtimeChat.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ReplyToMessageId");
 
                     b.ToTable("Messages");
                 });
@@ -405,18 +410,28 @@ namespace RealtimeChat.Migrations
                     b.HasOne("RealtimeChat.Models.AppUser", "FromUser")
                         .WithMany()
                         .HasForeignKey("FromUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RealtimeChat.Models.AppUser", "ToUser")
                         .WithMany()
                         .HasForeignKey("ToUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("FromUser");
 
                     b.Navigation("ToUser");
+                });
+
+            modelBuilder.Entity("RealtimeChat.Models.Messages", b =>
+                {
+                    b.HasOne("RealtimeChat.Models.Messages", "ReplyToMessage")
+                        .WithMany()
+                        .HasForeignKey("ReplyToMessageId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ReplyToMessage");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,12 +1,11 @@
 {
   "Version": 1,
-  "Hash": "51hzYWu3QpkooSaIBXipfgDkjEAxq6WSVgC5rm7M52k=",
+  "Hash": "AQZMEUyUyeZsu+eEktvgJXwDCI/ljo8iJtMkE6Win3E=",
   "Source": "RealtimeChat",
   "BasePath": "_content/RealtimeChat",
   "Mode": "Default",
   "ManifestType": "Publish",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "Assets": []
 }

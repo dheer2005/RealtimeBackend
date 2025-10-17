@@ -36,18 +36,41 @@ namespace RealtimeChat.Controllers
             return Ok(new { lastMsgSender = lastMessage?.FromUser, lastMsg =  lastMessage?.Message, lastMsgTime = lastMessage?.Created , Count = count });
         }
 
+
+
         [HttpGet("{From}/{user}")]
         public async Task<IActionResult> GetMessages(string From, string user)
         {
-            var list = await _context.Messages.Where(e => e.FromUser == From && e.UserTo == user).OrderBy(e => e.Created).ToListAsync();
+            var messages = await _context.Messages
+                .Where(m => (m.FromUser == From && m.UserTo == user) || (m.FromUser == user && m.UserTo == From))
+                .OrderBy(m => m.Created)
+                .Select(m => new
+                {
+                    id = m.Id,
+                    fromUser = m.FromUser,
+                    userTo = m.UserTo,
+                    message = m.Message,
+                    created = m.Created,
+                    status = m.Status,
+                    isImage = m.IsImage,
+                    mediaUrl = m.MediaUrl,
+                    reactions = m.Reactions,
+                    replyTo = m.ReplyToMessageId.HasValue
+                        ? _context.Messages
+                            .Where(r => r.Id == m.ReplyToMessageId.Value)
+                            .Select(r => new
+                            {
+                                id = r.Id,
+                                message = r.Message,
+                                mediaUrl = r.MediaUrl,
+                                isImage = r.IsImage
+                            })
+                            .FirstOrDefault()
+                        : null
+                })
+                .ToListAsync();
 
-            if (From != user)
-            {
-                var list1 = await _context.Messages.Where(e => e.FromUser == user && e.UserTo == From).OrderBy(e => e.Created).ToListAsync();
-                list.AddRange(list1);
-            }
-
-            return Ok(list);
+            return Ok(messages);
         }
 
         [HttpPost("groupChat")]
