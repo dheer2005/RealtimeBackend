@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RealtimeChat.Context;
 using RealtimeChat.Dtos;
 using RealtimeChat.Models;
+using RealtimeChat.Services;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -69,14 +70,21 @@ namespace RealtimeChat.Hubs
             if (string.IsNullOrEmpty(fromUser) || string.IsNullOrEmpty(userTo))
                 throw new ArgumentException("Invalid message data");
 
+            bool isLocation = isImage && !string.IsNullOrEmpty(mediaUrl) && mediaUrl.Contains("staticmap.openstreetmap.de");
+
+            string encryptedMessage = EncryptionHelper.Encrypt(message);
+            string encryptedMediaUrl =(!isLocation && isImage && !string.IsNullOrEmpty(mediaUrl)) 
+                ? EncryptionHelper.Encrypt(mediaUrl) 
+                : mediaUrl;
+
             var newMessage = new Messages
             {
                 FromUser = fromUser,
                 UserTo = userTo,
-                Message = message,
+                Message = encryptedMessage,
                 Status = "sent", 
                 IsImage = isImage,
-                MediaUrl = mediaUrl,
+                MediaUrl = encryptedMediaUrl,
                 Created = DateTime.UtcNow.AddHours(5.5),
                 ReplyToMessageId = replyToMessageId,
             };
@@ -97,21 +105,29 @@ namespace RealtimeChat.Hubs
                 id = newMessage.Id,
                 fromUser = newMessage.FromUser,
                 userTo = newMessage.UserTo,
-                message = newMessage.Message,
+                message = EncryptionHelper.Decrypt(newMessage.Message),
                 created = newMessage.Created,
                 status = newMessage.Status,
                 isImage = newMessage.IsImage,
-                mediaUrl = newMessage.MediaUrl,
+                mediaUrl = newMessage.IsImage
+                    ? (isLocation ? newMessage.MediaUrl : EncryptionHelper.Decrypt(newMessage.MediaUrl ?? ""))
+                    : null,
                 replyTo = repliedMessage != null ? new
                 {
                     id = repliedMessage.Id,
-                    message = repliedMessage.Message,
-                    mediaUrl = repliedMessage.MediaUrl,
+                    message = EncryptionHelper.Decrypt(repliedMessage.Message),
+                    mediaUrl = repliedMessage.IsImage
+                        ? (repliedMessage.MediaUrl != null && repliedMessage.MediaUrl.Contains("staticmap.openstreetmap.de")
+                            ? repliedMessage.MediaUrl
+                            : EncryptionHelper.Decrypt(repliedMessage.MediaUrl ?? ""))
+                        : null,
                     isImage = repliedMessage.IsImage
                 } : null
             };
 
-            var recipientConnectionId = onlineUsers.Values.FirstOrDefault(u => u.UserName == userTo)?.ConnectionId;
+            var recipientConnectionId = onlineUsers.TryGetValue(userTo, out var recipientUser) && recipientUser != null
+                ? recipientUser.ConnectionId
+                : null;
 
             if (recipientConnectionId != null)
             {
@@ -119,7 +135,6 @@ namespace RealtimeChat.Hubs
             }
 
             await Clients.Caller.SendAsync("ReceiveMessage", serverMessage);
-
         }
 
         public async Task DeleteMessage(int messageId)
@@ -155,12 +170,14 @@ namespace RealtimeChat.Hubs
         {
             var senderUserName = GetUserName();
 
-            if (string.IsNullOrEmpty(senderUserName))
+            if (string.IsNullOrEmpty(senderUserName) || string.IsNullOrEmpty(recipientUserName))
             {
                 return;
             }
 
-            var connectionId = onlineUsers.Values.FirstOrDefault(u => u != null && u.UserName == recipientUserName)?.ConnectionId;
+            var connectionId = onlineUsers.TryGetValue(recipientUserName, out var user) && user != null
+                ? user.ConnectionId
+                : null;
 
             if (connectionId != null)
             {
@@ -172,12 +189,14 @@ namespace RealtimeChat.Hubs
         {
             var senderUserName = GetUserName();
 
-            if (string.IsNullOrEmpty(senderUserName))
+            if (string.IsNullOrEmpty(senderUserName) || string.IsNullOrEmpty(recipientUserName))
             {
                 return;
             }
 
-            var connectionId = onlineUsers.Values.FirstOrDefault(u => u.UserName == recipientUserName)?.ConnectionId;
+            var connectionId = onlineUsers.TryGetValue(recipientUserName, out var user) && user != null
+                ? user.ConnectionId
+                : null;
 
             if (connectionId != null)
             {
@@ -202,7 +221,9 @@ namespace RealtimeChat.Hubs
 
                 await _context.SaveChangesAsync();
 
-                var senderConnectionId = onlineUsers.Values.FirstOrDefault(u => u != null && u.UserName == fromUser)?.ConnectionId;
+                var senderConnectionId = onlineUsers.TryGetValue(fromUser, out var senderUser) && senderUser != null
+                    ? senderUser.ConnectionId
+                    : null;
 
                 if (senderConnectionId != null)
                 {

@@ -29,6 +29,9 @@ namespace RealtimeChat.Context
         public DbSet<Group_chats> GroupChats { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
 
+        //public DbSet<ChatGroup> ChatGroups { get; set; }
+        //public DbSet<GroupMember> GroupMembers { get; set; }
+        //public DbSet<GroupMessage> GroupMessages { get; set; }
     }
 
     

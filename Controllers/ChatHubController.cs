@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using RealtimeChat.Context;
 using RealtimeChat.Models;
+using RealtimeChat.Services;
 
 namespace RealtimeChat.Controllers
 {
@@ -33,7 +34,30 @@ namespace RealtimeChat.Controllers
                 .Where(m => m.FromUser == fromUser && m.UserTo == userTo && m.Status != "seen")
                 .CountAsync();
 
-            return Ok(new { lastMsgSender = lastMessage?.FromUser, lastMsg =  lastMessage?.Message, lastMsgTime = lastMessage?.Created , Count = count });
+            string lastMsgText = string.Empty;
+
+            if(lastMessage != null)
+            {
+                if (lastMessage.IsImage && !string.IsNullOrEmpty(lastMessage.MediaUrl))
+                {
+                    if (lastMessage.MediaUrl.Contains("staticmap.openstreetmap.de"))
+                        lastMsgText = "📍 Location";
+                    else
+                        lastMsgText = "📷 Photo";
+                }
+                else
+                {
+                    lastMsgText = EncryptionHelper.Decrypt(lastMessage.Message);
+                }
+            }
+
+            return Ok(new 
+            { 
+                lastMsgSender = lastMessage?.FromUser, 
+                lastMsg = lastMsgText, 
+                lastMsgTime = lastMessage?.Created, 
+                Count = count 
+            });
         }
 
 
@@ -70,7 +94,31 @@ namespace RealtimeChat.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(messages);
+            var decryptedMessages = messages.Select(m => new
+            {
+                m.id,
+                m.fromUser,
+                m.userTo,
+                message = EncryptionHelper.Decrypt(m.message),
+                m.created,
+                m.status,
+                m.isImage,
+                mediaUrl = m.isImage && m.mediaUrl != null && !m.mediaUrl.Contains("staticmap.openstreetmap.de")
+                    ? EncryptionHelper.Decrypt(m.mediaUrl)
+                    : m.mediaUrl,
+                m.reactions,
+                replyTo = m.replyTo != null ? new
+                {
+                    m.replyTo.id,
+                    message = EncryptionHelper.Decrypt(m.replyTo.message),
+                    mediaUrl = m.replyTo.isImage && m.replyTo.mediaUrl != null && !m.replyTo.mediaUrl.Contains("staticmap.openstreetmap.de")
+                        ? EncryptionHelper.Decrypt(m.replyTo.mediaUrl)
+                        : m.replyTo.mediaUrl,
+                    m.replyTo.isImage
+                } : null
+            });
+
+            return Ok(decryptedMessages);
         }
 
         [HttpPost("groupChat")]
