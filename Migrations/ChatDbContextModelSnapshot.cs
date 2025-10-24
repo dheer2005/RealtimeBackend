@@ -260,7 +260,7 @@ namespace RealtimeChat.Migrations
 
                     b.HasIndex("ToUserId");
 
-                    b.ToTable("FriendRequests");
+                    b.ToTable("FriendRequests", (string)null);
                 });
 
             modelBuilder.Entity("RealtimeChat.Models.Group_chats", b =>
@@ -292,7 +292,7 @@ namespace RealtimeChat.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GroupChats");
+                    b.ToTable("GroupChats", (string)null);
                 });
 
             modelBuilder.Entity("RealtimeChat.Models.Messages", b =>
@@ -338,7 +338,7 @@ namespace RealtimeChat.Migrations
 
                     b.HasIndex("ReplyToMessageId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("RealtimeChat.Models.SeenUpdate", b =>
@@ -351,7 +351,7 @@ namespace RealtimeChat.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("SeenUpdate");
+                    b.ToTable("SeenUpdate", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

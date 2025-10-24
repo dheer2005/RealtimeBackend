@@ -64,7 +64,7 @@ namespace RealtimeChat.Controllers
             var result =await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded) 
             {
-                return BadRequest(new { message = "User creation faild, Please check user details and try again" });
+                return BadRequest(new { message = "User creation failed, Please check user details and try again" });
             }
 
             return Ok(user);
