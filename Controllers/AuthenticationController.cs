@@ -33,6 +33,7 @@ namespace RealtimeChat.Controllers
         [Route("Register")]
         public async Task<IActionResult> registerUser([FromForm] RegisterModel model)
         {
+
             var emailExists = await _userManager.FindByEmailAsync(model.Email);
             var nameExists = await _userManager.FindByNameAsync(model.UserName);
 

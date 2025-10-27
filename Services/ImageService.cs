@@ -21,24 +21,57 @@ namespace RealtimeChat.Services
         {
             if (file.Length == 0)
                 throw new ArgumentException("File is empty");
-            
-            await using var fileStream = file.OpenReadStream();
-            var uploadParams = new ImageUploadParams
-            {
-                File = new FileDescription(file.FileName, fileStream),
-                Folder = "Chatlify",
-                UseFilename = true,
-                UniqueFilename = true,
-                Overwrite = true,
-            };
 
-            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-            if(uploadResult.Error != null)
+            await using var fileStream = file.OpenReadStream();
+
+            var contentType = file.ContentType.ToLower();
+            RawUploadParams uploadParams;
+
+            if (contentType.StartsWith("video/"))
             {
-                throw new Exception(uploadResult.Error.Message);
+                uploadParams = new VideoUploadParams
+                {
+                    File = new FileDescription(file.FileName, fileStream),
+                    Folder = "Chatlify/Videos",
+                    UseFilename = true,
+                    UniqueFilename = true,
+                    Overwrite = true,
+                };
+            }
+            else if (contentType.StartsWith("image/"))
+            {
+                uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(file.FileName, fileStream),
+                    Folder = "Chatlify/Images",
+                    UseFilename = true,
+                    UniqueFilename = true,
+                    Overwrite = true,
+                };
+            }
+            else if (contentType.StartsWith("application/") || contentType.StartsWith("text/"))
+            {
+                uploadParams = new RawUploadParams
+                {
+                    File = new FileDescription(file.FileName, fileStream),
+                    Folder = "Chatlify/Files",
+                    UseFilename = true,
+                    UniqueFilename = true,
+                    Overwrite = true,
+                };
+            }
+            else
+            {
+                throw new ArgumentException("Unsupported file type");
             }
 
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+            if (uploadResult.Error != null)
+                throw new Exception(uploadResult.Error.Message);
+
             return uploadResult.SecureUrl.ToString();
+
         }
     }
 }
