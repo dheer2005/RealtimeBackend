@@ -254,15 +254,17 @@ namespace RealtimeChat.Hubs
             var userName = GetUserName();
             var onlineUsersSet = new HashSet<string>(onlineUsers.Where(u =>u.Value != null &&  u.Value.IsOnline).Select(u => u.Key));
 
-            var users = await _userManager.Users.Select(u => new OnlineUserDto
+            var users = await _userManager.Users
+                .Where(u=>u.UserName != null)
+                .Select(u => new OnlineUserDto
             {
                 Id = u.Id,
-                UserName = u.UserName,
+                UserName = u.UserName ?? "",
                 IsOnline = onlineUsersSet.Contains(u.UserName!),
-                FullName = u.FullName,
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber,
-                ProfileImage = u.ProfileImage,
+                FullName = u.FullName ?? "",
+                Email = u.Email ?? "",
+                PhoneNumber = u.PhoneNumber ?? "",
+                ProfileImage = u.ProfileImage ?? "",
             })
             .OrderByDescending(u => u.IsOnline)
                 .ThenBy(u => u.UserName)

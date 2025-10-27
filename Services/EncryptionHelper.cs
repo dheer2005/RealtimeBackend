@@ -45,7 +45,9 @@ namespace RealtimeChat.Services
             byte[] iv = new byte[ivLength];
             byte[] cipher = new byte[fullCipher.Length - iv.Length];
 
+            //copying initialization vector into iv array
             Array.Copy(fullCipher, 0, iv, 0, ivLength);
+            //copying encrypted bytes into ciper array
             Array.Copy(fullCipher, ivLength, cipher, 0, cipher.Length);
 
             aes.IV = iv;

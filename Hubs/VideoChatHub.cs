@@ -25,7 +25,6 @@ namespace RealtimeChat.Hubs
             return Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
         }
 
-
         public async Task SendOffer(string toUser, string offer)
         {
             var fromUser = GetUserName();
@@ -44,13 +43,11 @@ namespace RealtimeChat.Hubs
             await Clients.User(toUser).SendAsync("ReceiveCandidate", fromUser, candidate);
         }
 
-
         public async Task EndCall(string toUser)
         {
             var fromUser = GetUserName();
             await Clients.User(toUser).SendAsync("CallEnded", fromUser);
+            await Clients.Caller.SendAsync("CallEnded", toUser);
         }
-
-
     }
 }
