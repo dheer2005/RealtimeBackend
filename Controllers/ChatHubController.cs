@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using RealtimeChat.Context;
 using RealtimeChat.Models;
 using RealtimeChat.Services;
+using System.Text.RegularExpressions;
 
 namespace RealtimeChat.Controllers
 {
@@ -40,10 +41,26 @@ namespace RealtimeChat.Controllers
             {
                 if (lastMessage.IsImage && !string.IsNullOrEmpty(lastMessage.MediaUrl))
                 {
-                    if (lastMessage.MediaUrl.Contains("staticmap.openstreetmap.de"))
+                    var decryptedUrl = lastMessage.MediaUrl.Contains("base64") || lastMessage.MediaUrl.Contains("http")
+                        ? lastMessage.MediaUrl
+                        : EncryptionHelper.Decrypt(lastMessage.MediaUrl);
+
+                    if (decryptedUrl.Contains("staticmap.openstreetmap.de"))
+                    {
                         lastMsgText = "📍 Location";
-                    else
+                    }
+                    else if (Regex.IsMatch(decryptedUrl, @"\.(jpg|jpeg|png|gif|webp)$", RegexOptions.IgnoreCase))
+                    {
                         lastMsgText = "📷 Photo";
+                    }
+                    else if (Regex.IsMatch(decryptedUrl, @"\.(mp4|mov|avi|mkv|webm)$", RegexOptions.IgnoreCase))
+                    {
+                        lastMsgText = "🎬 Video";
+                    }
+                    else
+                    {
+                        lastMsgText = "📁 File";
+                    }
                 }
                 else
                 {

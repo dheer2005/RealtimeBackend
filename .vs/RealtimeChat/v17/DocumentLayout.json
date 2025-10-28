@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\desktop\\angularprojects\\realtimechatbackend\\hubs\\chathub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:hubs\\chathub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\desktop\\angularprojects\\realtimechatbackend\\services\\imageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:services\\imageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\desktop\\angularprojects\\realtimechatbackend\\controllers\\chathubcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:controllers\\chathubcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\desktop\\angularprojects\\realtimechatbackend\\services\\imageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:services\\imageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\desktop\\angularprojects\\realtimechatbackend\\hubs\\chathub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:hubs\\chathub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\desktop\\angularprojects\\realtimechatbackend\\hubs\\videochathub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -62,7 +62,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 17,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -85,12 +85,8 @@
               "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "ImageService.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\Services\\ImageService.cs",
               "RelativeDocumentMoniker": "Services\\ImageService.cs",
@@ -111,8 +107,7 @@
               "RelativeToolTip": "Hubs\\VideoChatHub.cs",
               "ViewState": "AQIAABwAAAAAAAAAAAAAAC0AAAAwAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-27T07:04:02.202Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-27T07:04:02.202Z"
             },
             {
               "$type": "Document",
@@ -124,8 +119,7 @@
               "RelativeToolTip": "Dtos\\OnlineUserDto.cs",
               "ViewState": "AQIAAAIAAAAAAAAAAAA7wAoAAAAqAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-27T04:51:59.282Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-27T04:51:59.282Z"
             },
             {
               "$type": "Document",
@@ -137,8 +131,7 @@
               "RelativeToolTip": "Models\\RegisterModel.cs",
               "ViewState": "AQIAAAQAAAAAAAAAAAA2wA4AAAAvAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-23T08:17:29.822Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-23T08:17:29.822Z"
             },
             {
               "$type": "Document",
@@ -174,8 +167,7 @@
               "RelativeToolTip": "Models\\AppUser.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-23T05:39:13.645Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-23T05:39:13.645Z"
             },
             {
               "$type": "Document",
@@ -197,7 +189,7 @@
               "RelativeDocumentMoniker": "Controllers\\ChatHubController.cs",
               "ToolTip": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\Controllers\\ChatHubController.cs",
               "RelativeToolTip": "Controllers\\ChatHubController.cs",
-              "ViewState": "AQIAAIAAAAAAAAAAAAAIwIEAAAAdAAAA",
+              "ViewState": "AQIAACEAAAAAAAAAAADwvywAAAAtAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-16T12:03:53.408Z",
               "EditorCaption": ""
@@ -228,13 +220,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "ChatHub.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\Hubs\\ChatHub.cs",
               "RelativeDocumentMoniker": "Hubs\\ChatHub.cs",
               "ToolTip": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\Hubs\\ChatHub.cs",
               "RelativeToolTip": "Hubs\\ChatHub.cs",
-              "ViewState": "AQIAADMAAAAAAAAAAAAowEYAAABEAAAA",
+              "ViewState": "AQIAAH0AAAAAAAAAAAAIwI0AAABDAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-16T09:57:11.945Z",
               "EditorCaption": ""
@@ -249,8 +241,7 @@
               "RelativeToolTip": "Controllers\\AuthenticationController.cs",
               "ViewState": "AQIAABcAAADgmZmZmZk8wCUAAABMAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-16T06:02:59.523Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-16T06:02:59.523Z"
             }
           ]
         }
