@@ -175,7 +175,6 @@ namespace RealtimeChat.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
@@ -202,7 +201,6 @@ namespace RealtimeChat.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("ProfileImage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
@@ -260,7 +258,7 @@ namespace RealtimeChat.Migrations
 
                     b.HasIndex("ToUserId");
 
-                    b.ToTable("FriendRequests", (string)null);
+                    b.ToTable("FriendRequests");
                 });
 
             modelBuilder.Entity("RealtimeChat.Models.Group_chats", b =>
@@ -292,7 +290,7 @@ namespace RealtimeChat.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GroupChats", (string)null);
+                    b.ToTable("GroupChats");
                 });
 
             modelBuilder.Entity("RealtimeChat.Models.Messages", b =>
@@ -338,7 +336,7 @@ namespace RealtimeChat.Migrations
 
                     b.HasIndex("ReplyToMessageId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("RealtimeChat.Models.SeenUpdate", b =>
@@ -351,7 +349,43 @@ namespace RealtimeChat.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("SeenUpdate", (string)null);
+                    b.ToTable("SeenUpdate");
+                });
+
+            modelBuilder.Entity("RealtimeChat.Models.UserSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeviceInfo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserSessions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

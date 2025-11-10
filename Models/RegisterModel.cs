@@ -4,7 +4,9 @@ namespace RealtimeChat.Models
 {
     public class RegisterModel
     {
-        [Required(ErrorMessage ="Username is required")]
+        [Required(ErrorMessage = "Username is required")]
+        [MinLength(3, ErrorMessage = "Username must be at least 3 characters long")]
+        [RegularExpression(@"^[a-zA-Z0-9._-]+$", ErrorMessage = "Username can only contain letters, numbers, dots, underscores, and hyphens (no spaces).")]
         public string UserName { get; set; }
 
         [Required(ErrorMessage = "Full name is required")]
@@ -15,11 +17,12 @@ namespace RealtimeChat.Models
         public string PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid email formats")]
+        [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", ErrorMessage = "Invalid email address format")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
         [MinLength(6, ErrorMessage = "Password must be atleast 6 characters")]
+        [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$", ErrorMessage = "Password must contain at least one letter, one number, and one special character.")]
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Profile image is required")]

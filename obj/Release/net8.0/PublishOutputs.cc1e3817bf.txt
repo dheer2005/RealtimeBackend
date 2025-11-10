@@ -61,6 +61,7 @@ C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Release\net8.
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Release\net8.0\PubTmp\Out\System.Text.Encodings.Web.dll
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Release\net8.0\PubTmp\Out\System.Text.Json.dll
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Release\net8.0\PubTmp\Out\System.Windows.Extensions.dll
+C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Release\net8.0\PubTmp\Out\UAParser.dll
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Release\net8.0\PubTmp\Out\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Release\net8.0\PubTmp\Out\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Release\net8.0\PubTmp\Out\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll

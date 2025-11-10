@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -12,6 +13,7 @@ namespace RealtimeChat.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FriendController : ControllerBase
     {
         private readonly ChatDbContext _context;
@@ -163,10 +165,28 @@ namespace RealtimeChat.Controllers
                         .OrderByDescending(r => r.RequestedAt)
                         .FirstOrDefault();
 
-                    string status = request == null ? "none" :
-                                    request.Status.ToLower() == "accepted" ? "friend" :
-                                    request.Status.ToLower() == "pending" ? "pending" :
-                                    "none";
+                    string status = "none";
+
+                    if (request != null)
+                    {
+                        var reqStatus = request.Status.ToLower();
+
+                        if (reqStatus == "accepted")
+                        {
+                            status = "friend";
+                        }
+                        else if (reqStatus == "pending")
+                        {
+                            if (request.FromUserId == currentUserId)
+                            {
+                                status = "requested";
+                            }
+                            else
+                            {
+                                status = "incoming";
+                            }
+                        }
+                    }
 
                     return new
                     {
