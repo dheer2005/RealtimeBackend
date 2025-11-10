@@ -1,14 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RealtimeChat.Context;
 using RealtimeChat.Dtos;
+using RealtimeChat.Hubs;
 using RealtimeChat.Interfaces;
 using RealtimeChat.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using UAParser;
 
 namespace RealtimeChat.Controllers
 {
@@ -20,13 +24,15 @@ namespace RealtimeChat.Controllers
         private readonly IConfiguration _configuration;
         private readonly ChatDbContext _context;
         private readonly IImageService _imageService;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public AuthenticationController(UserManager<AppUser> userManager, IConfiguration configuration, ChatDbContext context, IImageService imageService)
+        public AuthenticationController(UserManager<AppUser> userManager, IConfiguration configuration, ChatDbContext context, IImageService imageService, IHubContext<ChatHub> hubContext)
         {
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
             _imageService = imageService;
+            _hubContext = hubContext;
         }
 
         [HttpPost]
@@ -80,12 +86,14 @@ namespace RealtimeChat.Controllers
 
             if(user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
+                var jti = Guid.NewGuid().ToString();
+
                 var authClaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim("UserId", user.Id.ToString()),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Jti, jti),
                     new Claim("UserName", user?.UserName?.ToString()?? ""),
                     new Claim("Email", user?.Email ?? "")
                 };
@@ -95,10 +103,47 @@ namespace RealtimeChat.Controllers
                 var token = new JwtSecurityToken(
                     issuer: _configuration["JWT:ValidIssuer"],
                     audience: _configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddHours(2),
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );
+
+                var userAgent = Request.Headers["User-Agent"].ToString();
+                var uaParser = Parser.GetDefault();
+                var clientInfo = uaParser.Parse(userAgent);
+
+                var deviceInfo = $"{clientInfo.OS.Family} {clientInfo.OS.Major} - {clientInfo.UA.Family} {clientInfo.UA.Major}";
+                var ipAddress = model.ClientIp;
+
+                var existingSession = await _context.UserSessions
+                    .FirstOrDefaultAsync(s => s.UserId == user.Id
+                        && s.DeviceInfo == deviceInfo && s.IpAddress == ipAddress
+                        && !s.IsRevoked);
+
+                if (existingSession == null)
+                {
+                    var session = new UserSession
+                    {
+                        UserId = user.Id,
+                        JwtId = jti,
+                        ExpiresAt = token.ValidTo,
+                        CreatedAt = DateTime.UtcNow.AddHours(5.5),
+                        DeviceInfo = deviceInfo,
+                        IpAddress = ipAddress,
+                        IsRevoked = false
+                    };
+
+                    _context.UserSessions.Add(session);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    existingSession.ExpiresAt = token.ValidTo;
+                    existingSession.CreatedAt = DateTime.UtcNow.AddHours(5.5);
+                    existingSession.IpAddress = ipAddress;
+                    await _context.SaveChangesAsync();
+                }
+
+                await _hubContext.Clients.User(user.Id).SendAsync("SessionChanged", user.Id);
 
                 return Ok(new
                 {

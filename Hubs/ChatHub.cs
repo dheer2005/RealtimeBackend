@@ -25,6 +25,7 @@ namespace RealtimeChat.Hubs
         public override async Task OnConnectedAsync()
         {
             var userName = GetUserName();
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var connectionId = Context.ConnectionId;
 
             if (!string.IsNullOrEmpty(userName))
@@ -364,6 +365,31 @@ namespace RealtimeChat.Hubs
         public async Task UnfriendNotification(string user1, string user2)
         {
             await Clients.Users(user1, user2).SendAsync("Unfriended", new { user1, user2 });
+        }
+
+
+        public async Task JoinJwtGroup(string jwtId)
+        {
+            if (!string.IsNullOrEmpty(jwtId))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, jwtId);
+            }
+        }
+
+        public async Task NotifySessionChanged(string userId)
+        {
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await Clients.User(userId).SendAsync("SessionChanged", userId);
+            }
+        }
+
+        public async Task ForceLogoutDevice(string jwtId)
+        {
+            if (!string.IsNullOrEmpty(jwtId))
+            {
+                await Clients.Group(jwtId).SendAsync("ForceLogout");
+            }
         }
     }
 }

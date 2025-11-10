@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "hiQ27B1m+WM=",
+  "dgSpecHash": "4wM02E0O4cw=",
   "success": true,
   "projectFilePath": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj",
   "expectedPackageFiles": [
@@ -167,7 +167,8 @@
     "C:\\Users\\codetrade\\.nuget\\packages\\system.threading.channels\\8.0.0\\system.threading.channels.8.0.0.nupkg.sha512",
     "C:\\Users\\codetrade\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
     "C:\\Users\\codetrade\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
-    "C:\\Users\\codetrade\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512"
+    "C:\\Users\\codetrade\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512",
+    "C:\\Users\\codetrade\\.nuget\\packages\\uaparser\\3.1.47\\uaparser.3.1.47.nupkg.sha512"
   ],
   "logs": []
 }

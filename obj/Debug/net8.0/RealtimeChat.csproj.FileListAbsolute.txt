@@ -362,3 +362,4 @@ C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Debug\net8.0\
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.RealtimeChat.props
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.RealtimeChat.props
 C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\obj\Debug\net8.0\staticwebassets.pack.json
+C:\Users\codetrade\Desktop\AngularProjects\RealTimeChatBackend\bin\Debug\net8.0\UAParser.dll

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using RealtimeChat.Context;
@@ -8,8 +9,10 @@ using System.Text.RegularExpressions;
 
 namespace RealtimeChat.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ChatController : ControllerBase
     {
         private readonly ChatDbContext _context;
@@ -20,11 +23,18 @@ namespace RealtimeChat.Controllers
         }
 
 
-        [HttpGet("unread-counts/{fromUser}/{userTo}")]
-        public async Task<IActionResult> GetUnreadCount(string fromUser, string userTo)
+        [HttpGet("unread-counts/{userTo}")]
+        public async Task<IActionResult> GetUnreadCount(string userTo)
         {
-            if (string.IsNullOrEmpty(fromUser) || string.IsNullOrEmpty(userTo))
-                return BadRequest("Invalid usernames.");
+            var loggedInUser = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(loggedInUser))
+                return Unauthorized("Invalid or expired token.");
+
+            if (string.IsNullOrEmpty(userTo))
+                return BadRequest("Invalid target username.");
+
+            var fromUser = loggedInUser;
 
             var lastMessage = await _context.Messages
                 .Where(m => (m.FromUser == fromUser && m.UserTo == userTo) || (m.FromUser == userTo && m.UserTo == fromUser))
@@ -32,7 +42,7 @@ namespace RealtimeChat.Controllers
                 .FirstOrDefaultAsync();
 
             var count = await _context.Messages
-                .Where(m => m.FromUser == fromUser && m.UserTo == userTo && m.Status != "seen")
+                .Where(m => m.FromUser == userTo && m.UserTo == fromUser && m.Status != "seen")
                 .CountAsync();
 
             string lastMsgText = string.Empty;
@@ -79,9 +89,19 @@ namespace RealtimeChat.Controllers
 
 
 
-        [HttpGet("{From}/{user}")]
-        public async Task<IActionResult> GetMessages(string From, string user)
+        [HttpGet("{user}")]
+        public async Task<IActionResult> GetMessages(string user)
         {
+            var loggedInUser = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(loggedInUser))
+                return Unauthorized("Invalid or expired token.");
+
+            if (string.IsNullOrEmpty(user))
+                return BadRequest("Invalid target username.");
+
+            var From = loggedInUser;
+
             var messages = await _context.Messages
                 .Where(m => (m.FromUser == From && m.UserTo == user) || (m.FromUser == user && m.UserTo == From))
                 .OrderBy(m => m.Created)

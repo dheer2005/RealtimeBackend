@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using RealtimeChat.Context;
 using RealtimeChat.Hubs;
 using RealtimeChat.Interfaces;
 using RealtimeChat.Models;
 using RealtimeChat.Services;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +42,7 @@ builder.Services.AddAuthentication(options =>
      {
          ValidateIssuer = true,
          ValidateAudience = true,
-         ValidateLifetime = true,
+         ValidateLifetime = false,
          ValidateIssuerSigningKey = true,
          ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
          ValidAudience = builder.Configuration["JWT:ValidAudience"],
@@ -60,15 +63,68 @@ builder.Services.AddAuthentication(options =>
              }
 
              return Task.CompletedTask;
+         },
+
+         OnTokenValidated = async context =>
+         {
+             var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+             if (string.IsNullOrEmpty(jti))
+             {
+                 context.Fail("Token missing JTI");
+                 return;
+             }
+
+             var db = context.HttpContext.RequestServices.GetRequiredService<ChatDbContext>();
+             var session = await db.UserSessions.FirstOrDefaultAsync(s => s.JwtId == jti);
+
+             if (session == null || session.IsRevoked)
+             {
+                 context.Fail("Token revoked or invalid.");
+             }
          }
      };
+
+
  });
 
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Your API",
+        Version = "v1",
+        Description = "API with JWT Authentication"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter JWT token like: Bearer {your token}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Services.AddSignalR(options =>
 {
@@ -96,6 +152,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+
 app.UseRouting();
 
 app.UseCors("CorsPolicy");
