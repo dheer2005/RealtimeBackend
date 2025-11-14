@@ -35,6 +35,26 @@ namespace RealtimeChat.Controllers
             _hubContext = hubContext;
         }
 
+        private string GetCurrentUserId()
+        {
+            return _userManager.GetUserId(User);
+        }
+
+        private string GetCurrentUserName()
+        {
+            return _userManager.GetUserName(User);
+        }
+
+        private string GetPublicIdFromUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return null;
+
+            var parts = url.Split('/');
+            var folderAndFile = string.Join('/', parts.SkipWhile(p => !p.Contains("Chatlify")));
+            return folderAndFile.Replace(".jpg", "").Replace(".png", "").Replace(".jpeg", "");
+        }
+
         [HttpPost]
         [Route("Register")]
         public async Task<IActionResult> registerUser([FromForm] RegisterModel model)
@@ -66,6 +86,7 @@ namespace RealtimeChat.Controllers
                 Email = model.Email,
                 PhoneNumber = model.PhoneNumber,
                 ProfileImage = profileUrl,
+                CreatedAt = DateTime.Now,
                 SecurityStamp = Guid.NewGuid().ToString()
             };
             var result =await _userManager.CreateAsync(user, model.Password);
@@ -154,11 +175,15 @@ namespace RealtimeChat.Controllers
             return Unauthorized();
         }
 
-
+        [Authorize]
         [HttpGet]
         [Route("GetAllUsers/{loggedUserId}")]
         public async Task<IActionResult> GetAllUsers(string loggedUserId)
         {
+            var currentUserID = GetCurrentUserId();
+            if (currentUserID != loggedUserId)
+                return Forbid("Access denied.");
+
             var users = await _userManager.Users
                 .Where(m=>m.UserName != loggedUserId)
                 .ToListAsync();
@@ -166,13 +191,44 @@ namespace RealtimeChat.Controllers
             return Ok(users);
         }
 
+        [Authorize]
         [HttpGet("get-user-info-by-userName/{userName}")]
         public async Task<IActionResult> GetUserInfoByUserName(string userName)
         {
-            var user = await _userManager.FindByNameAsync(userName);
+            var currentUserName = GetCurrentUserName();
+            var currentUserId = GetCurrentUserId();
 
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null)
                 return BadRequest(new { message = "User not found" });
+
+            if (!string.IsNullOrEmpty(currentUserName) && currentUserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
+            {
+                var infoSelf = new UserInfoDto
+                {
+                    UserId = user.Id,
+                    ProfileImage = user.ProfileImage,
+                    UserName = user.UserName,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedAt = user.CreatedAt
+                };
+
+                return Ok(infoSelf);
+            }
+
+            if (string.IsNullOrEmpty(currentUserId))
+                return Forbid("Access denied.");
+
+            var isFriend = await _context.FriendRequests.AnyAsync(r =>
+                ((r.FromUserId == currentUserId && r.ToUserId == user.Id) ||
+                 (r.FromUserId == user.Id && r.ToUserId == currentUserId)) &&
+                 r.Status == "Accepted"
+            );
+
+            if (!isFriend)
+                return Forbid("Access denied. You can only view profiles of your friends.");
 
             var info = new UserInfoDto
             {
@@ -181,10 +237,62 @@ namespace RealtimeChat.Controllers
                 UserName = user.UserName,
                 FullName = user.FullName,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber,
+                CreatedAt = user.CreatedAt
             };
 
             return Ok(info);
+        }
+
+        [Authorize]
+        [HttpPut("edit-user-profile/{userId}")]
+        public async Task<IActionResult> EditUserProfile(string userId, [FromBody] EditProfileModel model)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId != userId)
+                return Forbid("Access denied.");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            // Update only editable fields
+            user.FullName = model.FullName ?? user.FullName;
+            user.Email = model.Email ?? user.Email;
+            user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
+            user.UserName = model.UserName ?? user.UserName;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return BadRequest(new { message = "Profile update failed", errors = result.Errors });
+
+            return Ok(new { message = "Profile updated successfully", user });
+        }
+
+        [Authorize]
+        [HttpPut("edit-user-profile-pic/{userId}")]
+        public async Task<IActionResult> EditUserProfilePic(string userId, [FromForm] EditProfilePicDto modal)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            if (modal.NewProfileImage == null)
+                return BadRequest(new { message = "Invalid image file" });
+
+            var newImageUrl = await _imageService.UploadImageAsync(modal.NewProfileImage);
+
+            // Optionally delete old image from storage if needed
+            var publicId = GetPublicIdFromUrl(user.ProfileImage);
+             await _imageService.DeleteImageAsync(publicId, "image");
+
+            user.ProfileImage = newImageUrl;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return BadRequest(new { message = "Profile picture update failed", errors = result.Errors });
+
+            return Ok(new { message = "Profile picture updated successfully", profileImage = newImageUrl });
         }
     }
 }
