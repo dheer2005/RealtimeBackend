@@ -73,5 +73,27 @@ namespace RealtimeChat.Services
             return uploadResult.SecureUrl.ToString();
 
         }
+
+        public async Task<bool> DeleteImageAsync(string publicId, string resourceType = "image")
+        {
+            if (string.IsNullOrWhiteSpace(publicId))
+                throw new ArgumentException("Public ID cannot be null or empty.", nameof(publicId));
+
+            // Cloudinary resource types can be: "image", "video", or "raw"
+            var deletionParams = new DeletionParams(publicId)
+            {
+                ResourceType = resourceType switch
+                {
+                    "video" => ResourceType.Video,
+                    "raw" => ResourceType.Raw,
+                    _ => ResourceType.Image
+                },
+                Invalidate = true // ensures cached versions are cleared from CDN
+            };
+
+            var result = await _cloudinary.DestroyAsync(deletionParams);
+
+            return result.Result == "ok";
+        }
     }
 }

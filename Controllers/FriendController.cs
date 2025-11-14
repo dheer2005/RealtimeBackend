@@ -26,9 +26,18 @@ namespace RealtimeChat.Controllers
             _hub = hub;
         }
 
+        private string GetCurrentUserId()
+        {
+            return _userManager.GetUserId(User);
+        }
+
         [HttpPost("send-request")]
         public async Task<IActionResult> SendRequest([FromBody] SendFriendRequestDto request)
         {
+            var currentUserId = GetCurrentUserId();
+            if (request.FromUserId != currentUserId)
+                return Forbid("You cannot send requests as another user.");
+
             if (request.FromUserId == request.ToUserId)
                 return BadRequest(new { message = "You can't send request to yourself" });
 
@@ -38,15 +47,6 @@ namespace RealtimeChat.Controllers
 
             if (exist)
                 return BadRequest(new { message = "Request already sent" });
-
-            //var exist = await _context.FriendRequests
-            //    .Where(fr => ((fr.FromUserId == request.FromUserId && fr.ToUserId == request.ToUserId) ||
-            //     (fr.FromUserId == request.ToUserId && fr.ToUserId == request.FromUserId)) && fr.Status == "Pending")
-            //    .OrderByDescending(fr => fr.RequestedAt)
-            //    .FirstOrDefaultAsync();
-
-            //if (exist != null)
-            //    return BadRequest(new { message = "Request already sent" });
 
             var newRequest = new FriendRequest
             {
@@ -67,11 +67,13 @@ namespace RealtimeChat.Controllers
         [HttpPost("friend-request-response")]
         public async Task<IActionResult> ResponseRequest([FromBody] ResponseRequestDto req)
         {
+            var currentUserId = GetCurrentUserId();
             var request = await _context.FriendRequests.FindAsync(req.RequestId);
             if (request == null)
-            {
                 return NotFound(new {message = "Request not found"});
-            }
+
+            if (request.ToUserId != currentUserId && request.FromUserId != currentUserId)
+                return Forbid("You are not part of this friend request.");
 
             if (req.Action == "accept")
                 request.Status = "Accepted";
@@ -88,6 +90,9 @@ namespace RealtimeChat.Controllers
         [HttpGet("friends/{userId}")]
         public async Task<IActionResult> GetFriends(string userId)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId != userId)
+                return Forbid("Access denied.");
             var friends = await _context.FriendRequests
                 .Where(r => (r.FromUserId == userId || r.ToUserId == userId) && r.Status == "Accepted")
                 .ToListAsync();
@@ -105,6 +110,10 @@ namespace RealtimeChat.Controllers
         [HttpGet("requests/{userId}")]
         public async Task<IActionResult> GetPendingRequests(string userId)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId != userId)
+                return Forbid("Access denied.");
+
             var request = await _context.FriendRequests
                 .Where(r=>r.ToUserId == userId && r.Status == "Pending")
                 .Include(r => r.FromUser)
@@ -141,6 +150,11 @@ namespace RealtimeChat.Controllers
         [HttpGet("search/{query}/{currentUserId}")]
         public async Task<IActionResult> SearchUsers(string query, string currentUserId)
         {
+
+            var jwtUserId = GetCurrentUserId();
+            if (jwtUserId != currentUserId)
+                return Forbid("Access denied.");
+
             var users = await _userManager.Users
                 .Where(u => u.UserName.Contains(query) && u.Id != currentUserId)
                 .Select(u => new
@@ -206,6 +220,10 @@ namespace RealtimeChat.Controllers
         [HttpDelete("unfriend/{currentUserId}/{friendId}")]
         public async Task<IActionResult> Unfriend(string currentUserId, string friendId)
         {
+            var jwtUserId = GetCurrentUserId();
+            if (jwtUserId != currentUserId)
+                return Forbid("Access denied.");
+
             var relation = await _context.FriendRequests.Where(r =>
                 (r.FromUserId == currentUserId && r.ToUserId == friendId) ||
                 (r.FromUserId == friendId && r.ToUserId == currentUserId))
@@ -226,6 +244,10 @@ namespace RealtimeChat.Controllers
         [HttpGet("sent-requests/{userId}")]
         public async Task<IActionResult> GetSentPendingRequests(string userId)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId != userId)
+                return Forbid("Access denied.");
+
             var sentRequests = await _context.FriendRequests
                 .Where(r => r.FromUserId == userId && r.Status == "Pending")
                 .Include(r => r.ToUser)

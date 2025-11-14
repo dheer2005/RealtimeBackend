@@ -6,7 +6,7 @@ namespace RealtimeChat.Models
     {
         [Required(ErrorMessage = "Username is required")]
         [MinLength(3, ErrorMessage = "Username must be at least 3 characters long")]
-        [RegularExpression(@"^[a-zA-Z0-9._-]+$", ErrorMessage = "Username can only contain letters, numbers, dots, underscores, and hyphens (no spaces).")]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, underscores (no spaces).")]
         public string UserName { get; set; }
 
         [Required(ErrorMessage = "Full name is required")]
