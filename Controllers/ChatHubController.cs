@@ -22,71 +22,59 @@ namespace RealtimeChat.Controllers
             _context = context;
         }
 
-
-        [HttpGet("unread-counts/{userTo}")]
-        public async Task<IActionResult> GetUnreadCount(string userTo)
+        [HttpGet("unread-summary/{currentUser}")]
+        public async Task<IActionResult> GetUnreadSummary(string currentUser)
         {
             var loggedInUser = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(loggedInUser))
-                return Unauthorized("Invalid or expired token.");
+            if (loggedInUser != currentUser)
+                return Unauthorized("Invalid token.");
 
-            if (string.IsNullOrEmpty(userTo))
-                return BadRequest("Invalid target username.");
-
-            var fromUser = loggedInUser;
-
-            var lastMessage = await _context.Messages
-                .Where(m => (m.FromUser == fromUser && m.UserTo == userTo) || (m.FromUser == userTo && m.UserTo == fromUser))
+            var messages = await _context.Messages
+                .Where(m => m.UserTo == currentUser || m.FromUser == currentUser)
                 .OrderByDescending(m => m.Created)
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
-            var count = await _context.Messages
-                .Where(m => m.FromUser == userTo && m.UserTo == fromUser && m.Status != "seen")
-                .CountAsync();
-
-            string lastMsgText = string.Empty;
-
-            if(lastMessage != null)
-            {
-                if (lastMessage.IsImage && !string.IsNullOrEmpty(lastMessage.MediaUrl))
+            var grouped = messages
+                .GroupBy(m => m.FromUser == currentUser ? m.UserTo : m.FromUser)
+                .Select(g =>
                 {
-                    var decryptedUrl = lastMessage.MediaUrl.Contains("base64") || lastMessage.MediaUrl.Contains("http")
-                        ? lastMessage.MediaUrl
-                        : EncryptionHelper.Decrypt(lastMessage.MediaUrl);
+                    var lastMsg = g.First();
+                    string displayMessage = "";
 
-                    if (decryptedUrl.Contains("staticmap.openstreetmap.de"))
+                    if (!lastMsg.IsImage)
                     {
-                        lastMsgText = "📍 Location";
-                    }
-                    else if (Regex.IsMatch(decryptedUrl, @"\.(jpg|jpeg|png|gif|webp)$", RegexOptions.IgnoreCase))
-                    {
-                        lastMsgText = "📷 Photo";
-                    }
-                    else if (Regex.IsMatch(decryptedUrl, @"\.(mp4|mov|avi|mkv|webm)$", RegexOptions.IgnoreCase))
-                    {
-                        lastMsgText = "🎬 Video";
+                        displayMessage = EncryptionHelper.Decrypt(lastMsg.Message);
                     }
                     else
                     {
-                        lastMsgText = "📁 File";
+                        var decryptedUrl = lastMsg.MediaUrl.Contains("base64") || lastMsg.MediaUrl.Contains("http")
+                            ? lastMsg.MediaUrl
+                            : EncryptionHelper.Decrypt(lastMsg.MediaUrl);
+
+                        if (decryptedUrl.Contains("staticmap.openstreetmap.de"))
+                            displayMessage = "📍 Location";
+                        else if (Regex.IsMatch(decryptedUrl, @"\.(jpg|jpeg|png|gif|webp)$", RegexOptions.IgnoreCase))
+                            displayMessage = "📷 Photo";
+                        else if (Regex.IsMatch(decryptedUrl, @"\.(mp4|mov|avi|mkv|webm)$", RegexOptions.IgnoreCase))
+                            displayMessage = "🎬 Video";
+                        else
+                            displayMessage = "📁 File";
                     }
-                }
-                else
-                {
-                    lastMsgText = EncryptionHelper.Decrypt(lastMessage.Message);
-                }
-            }
 
-            return Ok(new 
-            { 
-                lastMsgSender = lastMessage?.FromUser, 
-                lastMsg = lastMsgText, 
-                lastMsgTime = lastMessage?.Created, 
-                Count = count 
-            });
+                    return new
+                    {
+                        userName = g.Key,
+                        unreadCount = g.Count(x => x.UserTo == currentUser && x.Status != "seen"),
+                        lastMessage = displayMessage,
+                        lastMessageTime = lastMsg.Created,
+                        lastMessageSender = lastMsg.FromUser
+                    };
+                })
+                .ToList();
+
+            return Ok(grouped);
         }
-
 
 
         [HttpGet("{user}")]

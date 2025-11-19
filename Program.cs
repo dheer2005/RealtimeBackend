@@ -57,7 +57,7 @@ builder.Services.AddAuthentication(options =>
              var accessToken = context.Request.Query["access_token"];
              var path = context.HttpContext.Request.Path;
 
-             if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat") || path.StartsWithSegments("/video")))
+             if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat") || path.StartsWithSegments("/video") || path.StartsWithSegments("/audio")))
              {
                  context.Token = accessToken;
              }
@@ -137,7 +137,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-            .WithOrigins("https://real-time-chat-frontend-mu.vercel.app", "http://localhost:4200")
+            .WithOrigins("https://real-time-chat-frontend-mu.vercel.app", "http://localhost:4200", "https://vk0pgk75-4200.inc1.devtunnels.ms")
            .AllowAnyHeader()
            .AllowAnyMethod()
            .AllowCredentials();
@@ -164,5 +164,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/chat");
+app.MapHub<AudioCallHub>("/audio");
 app.MapHub<VideoChatHub>("/video");
 app.Run();
