@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using RealtimeChat.Context;
 using RealtimeChat.Dtos;
@@ -25,14 +26,16 @@ namespace RealtimeChat.Controllers
         private readonly ChatDbContext _context;
         private readonly IImageService _imageService;
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IMemoryCache _cache;
 
-        public AuthenticationController(UserManager<AppUser> userManager, IConfiguration configuration, ChatDbContext context, IImageService imageService, IHubContext<ChatHub> hubContext)
+        public AuthenticationController(UserManager<AppUser> userManager, IConfiguration configuration, ChatDbContext context, IImageService imageService, IHubContext<ChatHub> hubContext, IMemoryCache cache)
         {
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
             _imageService = imageService;
             _hubContext = hubContext;
+            _cache = cache;
         }
 
         private string GetCurrentUserId()
@@ -198,9 +201,20 @@ namespace RealtimeChat.Controllers
             var currentUserName = GetCurrentUserName();
             var currentUserId = GetCurrentUserId();
 
-            var user = await _userManager.FindByNameAsync(userName);
-            if (user == null)
-                return BadRequest(new { message = "User not found" });
+            var cacheKey = $"userinfo_{userName}";
+
+            if (!_cache.TryGetValue(cacheKey, out AppUser user))
+            {
+                user = await _userManager.FindByNameAsync(userName);
+                if (user == null)
+                    return BadRequest(new { message = "User not found" });
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(15))
+                    .SetAbsoluteExpiration(TimeSpan.FromHours(2));
+
+                _cache.Set(cacheKey, user, cacheOptions);
+            }
 
             if (!string.IsNullOrEmpty(currentUserName) && currentUserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
             {
@@ -266,6 +280,8 @@ namespace RealtimeChat.Controllers
             if (!result.Succeeded)
                 return BadRequest(new { message = "Profile update failed", errors = result.Errors });
 
+            _cache.Remove($"userinfo_{user.UserName}");
+
             return Ok(new { message = "Profile updated successfully", user });
         }
 
@@ -291,6 +307,8 @@ namespace RealtimeChat.Controllers
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return BadRequest(new { message = "Profile picture update failed", errors = result.Errors });
+
+            _cache.Remove($"userinfo_{user.UserName}");
 
             return Ok(new { message = "Profile picture updated successfully", profileImage = newImageUrl });
         }

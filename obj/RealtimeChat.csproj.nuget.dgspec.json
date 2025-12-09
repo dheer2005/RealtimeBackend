@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj": {}
+    "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj": {}
   },
   "projects": {
-    "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj": {
+    "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj",
+        "projectUniqueName": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj",
         "projectName": "RealtimeChat",
-        "projectPath": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj",
+        "projectPath": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj",
         "packagesPath": "C:\\Users\\codetrade\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\obj\\",
+        "outputPath": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\codetrade\\AppData\\Roaming\\NuGet\\NuGet.Config",

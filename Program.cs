@@ -137,7 +137,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-            .WithOrigins("https://real-time-chat-frontend-mu.vercel.app", "http://localhost:4200", "https://vk0pgk75-4200.inc1.devtunnels.ms")
+            .WithOrigins("https://speaklio.vercel.app", "http://localhost:4200", "https://vk0pgk75-4200.inc1.devtunnels.ms")
            .AllowAnyHeader()
            .AllowAnyMethod()
            .AllowCredentials();
