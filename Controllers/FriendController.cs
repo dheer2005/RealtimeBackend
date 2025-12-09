@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using RealtimeChat.Context;
 using RealtimeChat.Dtos;
 using RealtimeChat.Hubs;
@@ -19,16 +21,24 @@ namespace RealtimeChat.Controllers
         private readonly ChatDbContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly IHubContext<ChatHub> _hub;
-        public FriendController(UserManager<AppUser> userManager, ChatDbContext context, IHubContext<ChatHub> hub)
+        private readonly IMemoryCache _cache;
+        public FriendController(UserManager<AppUser> userManager, ChatDbContext context, IHubContext<ChatHub> hub, IMemoryCache cache)
         {
             _context = context;
             _userManager = userManager;
             _hub = hub;
+            _cache = cache;
         }
 
         private string GetCurrentUserId()
         {
             return _userManager.GetUserId(User);
+        }
+
+        private void InvalidateFriendCache(string userId1, string userId2)
+        {
+            _cache.Remove($"friends_{userId1}");
+            _cache.Remove($"friends_{userId2}");
         }
 
         [HttpPost("send-request")]
@@ -68,21 +78,25 @@ namespace RealtimeChat.Controllers
         public async Task<IActionResult> ResponseRequest([FromBody] ResponseRequestDto req)
         {
             var currentUserId = GetCurrentUserId();
-            var request = await _context.FriendRequests.FindAsync(req.RequestId);
+            var request = await _context.FriendRequests.Include(f=>f.FromUser).Include(f=>f.ToUser).FirstOrDefaultAsync(f => f.Id == req.RequestId);
             if (request == null)
-                return NotFound(new {message = "Request not found"});
+                return NotFound(new { message = "Request not found" });
 
             if (request.ToUserId != currentUserId && request.FromUserId != currentUserId)
                 return Forbid("You are not part of this friend request.");
 
             if (req.Action == "accept")
+            {
                 request.Status = "Accepted";
+                InvalidateFriendCache(request.FromUserId, request.ToUserId);
+            }
             else if (req.Action == "reject")
+            {
                 request.Status = "Rejected";
-
+            }
             await _context.SaveChangesAsync();
 
-            await _hub.Clients.Users(request.FromUserId, request.ToUserId).SendAsync("FriendRequestResponse", new { request.Id, Status = request.Status });
+            await _hub.Clients.Users(request.FromUserId, request.ToUserId).SendAsync("FriendRequestResponse", new { fromUserId = request.FromUserId, fromUser = request.FromUser, toUser = request.ToUser, toUserId= request.ToUserId, Status = request.Status });
 
             return Ok(request);
         }
@@ -93,16 +107,29 @@ namespace RealtimeChat.Controllers
             var currentUserId = GetCurrentUserId();
             if (currentUserId != userId)
                 return Forbid("Access denied.");
-            var friends = await _context.FriendRequests
-                .Where(r => (r.FromUserId == userId || r.ToUserId == userId) && r.Status == "Accepted")
-                .ToListAsync();
 
-            var friendIds = friends.
-                Select(r=>r.FromUserId == userId ? r.ToUserId : r.FromUserId).ToList();
+            var cacheKey = $"friends_{userId}";
 
-            var friendsList = await _userManager.Users
-                .Where(u=> friendIds.Contains(u.Id))
-                .ToListAsync();
+            if (!_cache.TryGetValue(cacheKey, out List<AppUser> friendsList))
+            {
+                var friends = await _context.FriendRequests
+                    .Where(r => (r.FromUserId == userId || r.ToUserId == userId) && r.Status == "Accepted")
+                    .ToListAsync();
+
+                var friendIds = friends
+                    .Select(r => r.FromUserId == userId ? r.ToUserId : r.FromUserId)
+                    .ToList();
+
+                friendsList = await _userManager.Users
+                    .Where(u => friendIds.Contains(u.Id))
+                    .ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10))
+                    .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+
+                _cache.Set(cacheKey, friendsList, cacheOptions);
+            }
 
             return Ok(friendsList);
         }
@@ -230,13 +257,35 @@ namespace RealtimeChat.Controllers
             .OrderByDescending(r=>r.RequestedAt)
             .FirstOrDefaultAsync();
 
+            var requestForCancel = relation.Status == "Pending" ? true : false;
+
             if (relation == null)
                 return NotFound(new { message = "Friendship not found" });
+
+            //remove range of user messages
+            var currentUser = await _context.Users.FindAsync(currentUserId);
+            var friendUser = await _context.Users.FindAsync(friendId);
+
+            if (currentUser == null || friendUser == null)
+                return NotFound(new { message = "User not found" });
+
+            var currentUsername = currentUser.UserName;
+            var friendUsername = friendUser.UserName;
+
+            var messagesToDelete = await _context.Messages.Where(m =>
+                (m.FromUser == currentUsername && m.UserTo == friendUsername) ||
+                (m.FromUser == friendUsername && m.UserTo == currentUsername))
+            .ToListAsync();
+
+            _context.Messages.RemoveRange(messagesToDelete);
+
 
             _context.FriendRequests.Remove(relation);
             await _context.SaveChangesAsync();
 
-            await _hub.Clients.Users(currentUserId, friendId).SendAsync("Unfriended", new { user1 = currentUserId, user2 = friendId });
+            InvalidateFriendCache(currentUserId, friendId);
+
+            await _hub.Clients.Users(currentUserId, friendId).SendAsync("Unfriended", new { fromUser = currentUserId, toUser = friendId, forCancel = requestForCancel });
 
             return Ok(new { message = "Unfriended successfully" });
         }

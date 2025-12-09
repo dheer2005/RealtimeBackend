@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "4wM02E0O4cw=",
+  "dgSpecHash": "SzRcO8CSTf4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\codetrade\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj",
+  "projectFilePath": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\RealtimeChat.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\codetrade\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\codetrade\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

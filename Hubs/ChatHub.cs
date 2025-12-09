@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using RealtimeChat.Context;
 using RealtimeChat.Dtos;
 using RealtimeChat.Models;
@@ -14,12 +15,14 @@ namespace RealtimeChat.Hubs
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly ChatDbContext _context;
+        private readonly IMemoryCache _cache;
         private static readonly Dictionary<string, OnlineUserDto> onlineUsers = new Dictionary<string, OnlineUserDto>();
 
-        public ChatHub(UserManager<AppUser> userManager, ChatDbContext context)
+        public ChatHub(UserManager<AppUser> userManager, ChatDbContext context, IMemoryCache cache)
         {
             _userManager = userManager;
             _context = context;
+            _cache = cache;
         }
 
         public override async Task OnConnectedAsync()
@@ -47,8 +50,6 @@ namespace RealtimeChat.Hubs
 
                     onlineUsers.TryAdd(userName, onlineUser);
                 }
-
-                Console.WriteLine($"User {userName} connected with connection ID {connectionId}");
 
                 await Clients.Others.SendAsync("UserOnline", userName);
 
@@ -92,6 +93,9 @@ namespace RealtimeChat.Hubs
 
             _context.Messages.Add(newMessage);
             await _context.SaveChangesAsync();
+
+            _cache.Remove($"unread_summary_{fromUser}");
+            _cache.Remove($"unread_summary_{userTo}");
 
             Messages? repliedMessage = null;
             if (replyToMessageId.HasValue)
@@ -151,6 +155,8 @@ namespace RealtimeChat.Hubs
             _context.Messages.Remove(message);
             await _context.SaveChangesAsync();
 
+            _cache.Remove($"unread_summary_{fromUser}");
+            _cache.Remove($"unread_summary_{userTo}");
 
             var senderConnectionId = onlineUsers.Values.FirstOrDefault(u => u.UserName == fromUser)?.ConnectionId;
             var receiverId = onlineUsers.Values.FirstOrDefault(u => u.UserName == userTo)?.ConnectionId;
@@ -221,6 +227,9 @@ namespace RealtimeChat.Hubs
                 }
 
                 await _context.SaveChangesAsync();
+
+                _cache.Remove($"unread_summary_{currentUser}");
+                _cache.Remove($"unread_summary_{fromUser}");
 
                 var senderConnectionId = onlineUsers.TryGetValue(fromUser, out var senderUser) && senderUser != null
                     ? senderUser.ConnectionId

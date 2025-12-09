@@ -16,10 +16,12 @@ namespace RealtimeChat.Controllers
     public class ChatController : ControllerBase
     {
         private readonly ChatDbContext _context;
+        private readonly IMemoryCache _cache;
 
-        public ChatController(ChatDbContext context, IMemoryCache memoryCache)
+        public ChatController(ChatDbContext context, IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
         }
 
         [HttpGet("unread-summary/{currentUser}")]
@@ -30,48 +32,60 @@ namespace RealtimeChat.Controllers
             if (loggedInUser != currentUser)
                 return Unauthorized("Invalid token.");
 
-            var messages = await _context.Messages
-                .Where(m => m.UserTo == currentUser || m.FromUser == currentUser)
-                .OrderByDescending(m => m.Created)
-                .ToListAsync();
+            var cacheKey = $"unread_summary_{currentUser}";
 
-            var grouped = messages
-                .GroupBy(m => m.FromUser == currentUser ? m.UserTo : m.FromUser)
-                .Select(g =>
-                {
-                    var lastMsg = g.First();
-                    string displayMessage = "";
+            if (!_cache.TryGetValue(cacheKey, out object grouped))
+            {
+                var messages = await _context.Messages
+                    .Where(m => m.UserTo == currentUser || m.FromUser == currentUser)
+                    .OrderByDescending(m => m.Created)
+                    .ToListAsync();
 
-                    if (!lastMsg.IsImage)
+                grouped = messages
+                    .GroupBy(m => m.FromUser == currentUser ? m.UserTo : m.FromUser)
+                    .Select(g =>
                     {
-                        displayMessage = EncryptionHelper.Decrypt(lastMsg.Message);
-                    }
-                    else
-                    {
-                        var decryptedUrl = lastMsg.MediaUrl.Contains("base64") || lastMsg.MediaUrl.Contains("http")
-                            ? lastMsg.MediaUrl
-                            : EncryptionHelper.Decrypt(lastMsg.MediaUrl);
+                        var lastMsg = g.First();
+                        string displayMessage = "";
 
-                        if (decryptedUrl.Contains("staticmap.openstreetmap.de"))
-                            displayMessage = "📍 Location";
-                        else if (Regex.IsMatch(decryptedUrl, @"\.(jpg|jpeg|png|gif|webp)$", RegexOptions.IgnoreCase))
-                            displayMessage = "📷 Photo";
-                        else if (Regex.IsMatch(decryptedUrl, @"\.(mp4|mov|avi|mkv|webm)$", RegexOptions.IgnoreCase))
-                            displayMessage = "🎬 Video";
+                        if (!lastMsg.IsImage)
+                        {
+                            displayMessage = EncryptionHelper.Decrypt(lastMsg.Message);
+                        }
                         else
-                            displayMessage = "📁 File";
-                    }
+                        {
+                            var decryptedUrl = lastMsg.MediaUrl.Contains("base64") || lastMsg.MediaUrl.Contains("http")
+                                ? lastMsg.MediaUrl
+                                : EncryptionHelper.Decrypt(lastMsg.MediaUrl);
 
-                    return new
-                    {
-                        userName = g.Key,
-                        unreadCount = g.Count(x => x.UserTo == currentUser && x.Status != "seen"),
-                        lastMessage = displayMessage,
-                        lastMessageTime = lastMsg.Created,
-                        lastMessageSender = lastMsg.FromUser
-                    };
-                })
-                .ToList();
+                            if (decryptedUrl.Contains("staticmap.openstreetmap.de"))
+                                displayMessage = "📍 Location";
+                            else if (Regex.IsMatch(decryptedUrl, @"\.(jpg|jpeg|png|gif|webp)$", RegexOptions.IgnoreCase))
+                                displayMessage = "📷 Photo";
+                            else if (Regex.IsMatch(decryptedUrl, @"\.(mp4|mov|avi|mkv|webm)$", RegexOptions.IgnoreCase))
+                                displayMessage = "🎬 Video";
+                            else
+                                displayMessage = "📁 File";
+                        }
+
+                        return new
+                        {
+                            userName = g.Key,
+                            unreadCount = g.Count(x => x.UserTo == currentUser && x.Status != "seen"),
+                            lastMessage = displayMessage,
+                            lastMessageTime = lastMsg.Created,
+                            lastMessageSender = lastMsg.FromUser
+                        };
+                    })
+                    .ToList();
+
+                // Short cache duration for real-time messaging
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromSeconds(30))
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
+
+                _cache.Set(cacheKey, grouped, cacheOptions);
+            }
 
             return Ok(grouped);
         }
