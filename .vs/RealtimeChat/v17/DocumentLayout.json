@@ -3,20 +3,36 @@
   "WorkspaceRootPath": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\models\\messages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:models\\messages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\controllers\\friendcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:controllers\\friendcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\hubs\\audiocallhub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:hubs\\audiocallhub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\hubs\\chathub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:hubs\\chathub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\hubs\\audiocallhub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:hubs\\audiocallhub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\models\\usersession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:models\\usersession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\models\\appuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:models\\appuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\models\\group-chats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:models\\group-chats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\models\\messages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:models\\messages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\controllers\\friendcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|solutionrelative:controllers\\friendcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{325EE945-1995-4D0D-8811-AE1D11A2DD85}|RealtimeChat.csproj|c:\\users\\codetrade\\onedrive\\desktop\\angularprojects\\realtimechatbackend\\controllers\\chathubcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -46,7 +62,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 16,
           "Children": [
             {
               "$type": "Bookmark",
@@ -70,20 +86,72 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
+              "Title": "UserSession.cs",
+              "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\UserSession.cs",
+              "RelativeDocumentMoniker": "Models\\UserSession.cs",
+              "ToolTip": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\UserSession.cs",
+              "RelativeToolTip": "Models\\UserSession.cs",
+              "ViewState": "AQIAAAEAAAAAAAAAAAAkwA0AAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T07:33:18.557Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AppUser.cs",
+              "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\AppUser.cs",
+              "RelativeDocumentMoniker": "Models\\AppUser.cs",
+              "ToolTip": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\AppUser.cs",
+              "RelativeToolTip": "Models\\AppUser.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T07:32:54.725Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Group-chats.cs",
+              "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\Group-chats.cs",
+              "RelativeDocumentMoniker": "Models\\Group-chats.cs",
+              "ToolTip": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\Group-chats.cs",
+              "RelativeToolTip": "Models\\Group-chats.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T07:32:43.757Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AQIAAAYAAAAAAAAAAAAAABAAAAAEAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-12-10T06:23:28.902Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "Messages.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\Messages.cs",
               "RelativeDocumentMoniker": "Models\\Messages.cs",
               "ToolTip": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\Messages.cs",
               "RelativeToolTip": "Models\\Messages.cs",
-              "ViewState": "AQIAAAsAAAAAAAAAAAAywBUAAAAAAAAA",
+              "ViewState": "AQIAAA4AAAAAAAAAAAAywBUAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-08T09:21:02.957Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "RegisterModel.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\RegisterModel.cs",
               "RelativeDocumentMoniker": "Models\\RegisterModel.cs",
@@ -95,7 +163,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 9,
               "Title": "FriendRequest.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Models\\FriendRequest.cs",
               "RelativeDocumentMoniker": "Models\\FriendRequest.cs",
@@ -103,12 +171,11 @@
               "RelativeToolTip": "Models\\FriendRequest.cs",
               "ViewState": "AQIAAAEAAAAAAAAAAAAkwAgAAABBAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-08T09:20:30.679Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-08T09:20:30.679Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 8,
               "Title": "ChatHubController.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Controllers\\ChatHubController.cs",
               "RelativeDocumentMoniker": "Controllers\\ChatHubController.cs",
@@ -116,12 +183,11 @@
               "RelativeToolTip": "Controllers\\ChatHubController.cs",
               "ViewState": "AQIAAD4AAAAAAAAAAAAowCQAAAAyAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-05T11:22:25.953Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-05T11:22:25.953Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 7,
               "Title": "FriendController.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Controllers\\FriendController.cs",
               "RelativeDocumentMoniker": "Controllers\\FriendController.cs",
@@ -129,12 +195,11 @@
               "RelativeToolTip": "Controllers\\FriendController.cs",
               "ViewState": "AQIAAOYAAAAAAAAAAAAgwPsAAAAwAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-05T10:37:44.615Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-05T10:37:44.615Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 11,
               "Title": "AuthenticationController.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Controllers\\AuthenticationController.cs",
               "RelativeDocumentMoniker": "Controllers\\AuthenticationController.cs",
@@ -146,33 +211,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "ChatHub.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Hubs\\ChatHub.cs",
               "RelativeDocumentMoniker": "Hubs\\ChatHub.cs",
               "ToolTip": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Hubs\\ChatHub.cs",
               "RelativeToolTip": "Hubs\\ChatHub.cs",
-              "ViewState": "AQIAAIsAAAAAAAAAAIAwwJsAAAAuAAAA",
+              "ViewState": "AQIAAIABAAAAAAAAAAAQwI0BAAAtAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-19T11:30:33.478Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "AudioCallHub.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Hubs\\AudioCallHub.cs",
               "RelativeDocumentMoniker": "Hubs\\AudioCallHub.cs",
               "ToolTip": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Hubs\\AudioCallHub.cs",
               "RelativeToolTip": "Hubs\\AudioCallHub.cs",
-              "ViewState": "AQIAAHkAAAAAAAAAAAAgwIkAAAAXAAAA",
+              "ViewState": "AQIAAKgAAAAAAAAAAAAgwLkAAAAnAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-19T11:26:52.792Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 12,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\codetrade\\OneDrive\\Desktop\\AngularProjects\\RealTimeChatBackend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
