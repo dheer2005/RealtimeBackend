@@ -244,6 +244,18 @@ namespace RealtimeChat.Hubs
             }
         }
 
+        public async Task MarkGroupMessagesAsSeen(int groupId, string userName)
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return;
+
+            // Mark all unseen messages in this group for this user as seen
+            // Note: You'll need to add a GroupMessageRead table or similar to track this
+            // For now, just notify the group
+            await Clients.Group($"group_{groupId}").SendAsync("GroupMessagesSeen", groupId, userName);
+        }
+
         public async Task JoinGroup(string groupName)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
@@ -399,6 +411,163 @@ namespace RealtimeChat.Hubs
             {
                 await Clients.Group(jwtId).SendAsync("ForceLogout");
             }
+        }
+
+        public async Task JoinGroupRoom(int groupId)
+        {
+            var userName = GetUserName();
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return;
+
+            var isMember = await _context.GroupMembers
+                .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == userId);
+
+            if (isMember)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"group_{groupId}");
+            }
+        }
+
+        public async Task LeaveGroupRoom(int groupId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupId}");
+        }
+
+        public async Task SendGroupMessage(int groupId, string fromUser, string message, DateTime created, bool isImage, string mediaUrl, int? replyToMessageId)
+        {
+            if (string.IsNullOrEmpty(fromUser))
+                throw new ArgumentException("Invalid message data");
+
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException();
+
+            var isMember = await _context.GroupMembers
+                .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == userId);
+
+            if (!isMember)
+                throw new UnauthorizedAccessException("Not a member of this group");
+
+            bool isLocation = isImage && !string.IsNullOrEmpty(mediaUrl) && mediaUrl.Contains("staticmap.openstreetmap.de");
+
+            string encryptedMessage = EncryptionHelper.Encrypt(message);
+            string encryptedMediaUrl = (!isLocation && isImage && !string.IsNullOrEmpty(mediaUrl))
+                ? EncryptionHelper.Encrypt(mediaUrl)
+                : mediaUrl;
+
+            var newMessage = new GroupMessage
+            {
+                GroupId = groupId,
+                FromUser = fromUser,
+                Message = encryptedMessage,
+                Status = "sent",
+                IsImage = isImage,
+                MediaUrl = encryptedMediaUrl,
+                Created = DateTime.UtcNow.AddHours(5.5),
+                ReplyToMessageId = replyToMessageId
+            };
+
+            _context.GroupMessages.Add(newMessage);
+            await _context.SaveChangesAsync();
+
+            GroupMessage? repliedMessage = null;
+            if (replyToMessageId.HasValue)
+            {
+                repliedMessage = await _context.GroupMessages
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m => m.Id == replyToMessageId.Value);
+            }
+
+            var serverMessage = new
+            {
+                id = newMessage.Id,
+                groupId = newMessage.GroupId,
+                fromUser = newMessage.FromUser,
+                message = EncryptionHelper.Decrypt(newMessage.Message),
+                created = newMessage.Created,
+                status = newMessage.Status,
+                isImage = newMessage.IsImage,
+                mediaUrl = newMessage.IsImage
+                    ? (isLocation ? newMessage.MediaUrl : EncryptionHelper.Decrypt(newMessage.MediaUrl ?? ""))
+                    : null,
+                replyTo = repliedMessage != null ? new
+                {
+                    id = repliedMessage.Id,
+                    message = EncryptionHelper.Decrypt(repliedMessage.Message),
+                    mediaUrl = repliedMessage.IsImage
+                        ? (repliedMessage.MediaUrl != null && repliedMessage.MediaUrl.Contains("staticmap.openstreetmap.de")
+                            ? repliedMessage.MediaUrl
+                            : EncryptionHelper.Decrypt(repliedMessage.MediaUrl ?? ""))
+                        : null,
+                    isImage = repliedMessage.IsImage,
+                    fromUser = repliedMessage.FromUser
+                } : null
+            };
+
+            await Clients.Group($"group_{groupId}").SendAsync("ReceiveGroupMessage", serverMessage);
+        }
+
+        public async Task DeleteGroupMessage(int messageId, int groupId)
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException();
+
+            var message = await _context.GroupMessages.FindAsync(messageId);
+            if (message == null)
+                throw new Exception("Message not found");
+
+            var userName = GetUserName();
+            var isAdmin = await _context.GroupMembers
+                .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == userId && gm.IsAdmin);
+
+            if (message.FromUser != userName && !isAdmin)
+                throw new UnauthorizedAccessException("You can only delete your own messages");
+
+            _context.GroupMessages.Remove(message);
+            await _context.SaveChangesAsync();
+
+            await Clients.Group($"group_{groupId}").SendAsync("GroupMessageDeleted", messageId);
+        }
+
+        public async Task NotifyGroupTyping(int groupId)
+        {
+            var userName = GetUserName();
+            if (string.IsNullOrEmpty(userName))
+                return;
+
+            await Clients.OthersInGroup($"group_{groupId}").SendAsync("UserTypingInGroup", groupId, userName);
+        }
+
+        public async Task NotifyGroupStopTyping(int groupId)
+        {
+            var userName = GetUserName();
+            if (string.IsNullOrEmpty(userName))
+                return;
+
+            await Clients.OthersInGroup($"group_{groupId}").SendAsync("UserStopTypingInGroup", groupId, userName);
+        }
+
+        public async Task GroupUpdated(int groupId, string groupName, string groupImage)
+        {
+            await Clients.Group($"group_{groupId}").SendAsync("OnGroupUpdated", new
+            {
+                groupId,
+                groupName,
+                groupImage
+            });
+        }
+
+        public async Task MemberAdded(int groupId, object member)
+        {
+            await Clients.Group($"group_{groupId}").SendAsync("OnMemberAdded", groupId, member);
+        }
+
+        public async Task MemberRemoved(int groupId, string userId)
+        {
+            await Clients.Group($"group_{groupId}").SendAsync("OnMemberRemoved", groupId, userId);
         }
     }
 }

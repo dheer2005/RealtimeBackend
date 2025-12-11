@@ -18,9 +18,35 @@ namespace RealtimeChat.Context
 
             builder.Entity<Messages>()
             .HasOne(m => m.ReplyToMessage)
-            .WithMany() // no collection navigation
+            .WithMany()
             .HasForeignKey(m => m.ReplyToMessageId)
             .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ChatGroup>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.GroupName).IsRequired().HasMaxLength(100);
+                entity.HasMany(e => e.Members)
+                    .WithOne(m => m.Group)
+                    .HasForeignKey(m => m.GroupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(e => e.Messages)
+                    .WithOne(m => m.Group)
+                    .HasForeignKey(m => m.GroupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<GroupMember>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.GroupId, e.UserId }).IsUnique();
+            });
+
+            builder.Entity<GroupMessage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Message).IsRequired();
+            });
 
             base.OnModelCreating(builder);
         }
@@ -29,6 +55,9 @@ namespace RealtimeChat.Context
         public DbSet<Group_chats> GroupChats { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<UserSession> UserSessions { get; set; }
+        public DbSet<ChatGroup> ChatGroups { get; set; }
+        public DbSet<GroupMember> GroupMembers { get; set; }
+        public DbSet<GroupMessage> GroupMessages { get; set; }
 
     }
 
