@@ -33,6 +33,8 @@ namespace RealtimeChat.Hubs
 
             if (!string.IsNullOrEmpty(userName))
             {
+                bool wasAlreadyOnline = onlineUsers.ContainsKey(userName);
+        
                 if (onlineUsers.ContainsKey(userName))
                 {
                     onlineUsers[userName].ConnectionId = connectionId;
@@ -45,15 +47,19 @@ namespace RealtimeChat.Hubs
                         ConnectionId = connectionId,
                         UserName = userName,
                         IsOnline = true
-
                     };
 
                     onlineUsers.TryAdd(userName, onlineUser);
                 }
 
-                await Clients.Others.SendAsync("UserOnline", userName);
+                // Only notify others if user was actually offline before
+                if (!wasAlreadyOnline)
+                {
+                    await Clients.Others.SendAsync("UserOnline", userName);
+                }
 
-                await Clients.All.SendAsync("OnlineUsers", await GetAllUsers());
+                // Send the full list ONLY to the newly connected user
+                await Clients.Caller.SendAsync("OnlineUsers", await GetAllUsers());
             }
 
             await base.OnConnectedAsync();
@@ -304,9 +310,8 @@ namespace RealtimeChat.Hubs
             {
                 if (onlineUsers.Remove(userName, out var removedUser))
                 {
+                    // Only notify others that this user went offline
                     await Clients.Others.SendAsync("UserOffline", userName);
-
-                    await Clients.All.SendAsync("OnlineUsers", await GetAllUsers());
                 }
             }
 
