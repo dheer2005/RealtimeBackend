@@ -560,6 +560,11 @@ namespace RealtimeChat.Hubs
             });
         }
 
+        public async Task GroupCreated(object group, List<string> memberIds)
+        {
+            await Clients.Users(memberIds).SendAsync("ReceiveGroupCreated", group);
+        }
+
         public async Task MemberAdded(int groupId, object member)
         {
             await Clients.Group($"group_{groupId}").SendAsync("OnMemberAdded", groupId, member);
