@@ -272,10 +272,7 @@ namespace RealtimeChat.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
         }
 
-        public async Task SendMessageToGroup(string groupName, string fromUser, string message, DateTime created)
-        {
-            await Clients.Group(groupName).SendAsync("ReceiveGroupMessage", groupName, fromUser, message, created);
-        }
+        
 
         private async Task<IEnumerable<OnlineUserDto>> GetAllUsers()
         {
@@ -491,7 +488,7 @@ namespace RealtimeChat.Hubs
                 groupId = newMessage.GroupId,
                 fromUser = newMessage.FromUser,
                 message = EncryptionHelper.Decrypt(newMessage.Message),
-                created = newMessage.Created,
+                created = newMessage.Created.AddHours(-5.5),
                 status = newMessage.Status,
                 isImage = newMessage.IsImage,
                 mediaUrl = newMessage.IsImage
