@@ -545,3 +545,9 @@ C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\obj\Debu
 C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\obj\Debug\net8.0\RealtimeChat.pdb
 C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\obj\Debug\net8.0\RealtimeChat.genruntimeconfig.cache
 C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\obj\Debug\net8.0\ref\RealtimeChat.dll
+C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\bin\Debug\net8.0\Google.Apis.dll
+C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\bin\Debug\net8.0\Google.Apis.Auth.dll
+C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\bin\Debug\net8.0\Google.Apis.Core.dll
+C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.Google.dll
+C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\bin\Debug\net8.0\System.Management.dll
+C:\Users\codetrade\OneDrive\Desktop\AngularProjects\RealTimeChatBackend\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll

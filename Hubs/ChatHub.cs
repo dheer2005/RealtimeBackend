@@ -579,5 +579,20 @@ namespace RealtimeChat.Hubs
         {
             await Clients.Group($"group_{groupId}").SendAsync("OnMemberRemoved", groupId, userId);
         }
+
+        public async Task MemberPromotedToAdmin(int groupId, string userId)
+        {
+            await Clients.Group($"group_{groupId}").SendAsync("OnMemberPromotedToAdmin", groupId, userId);
+        }
+
+        public async Task MemberDemotedFromAdmin(int groupId, string userId)
+        {
+            await Clients.Group($"group_{groupId}").SendAsync("OnMemberDemotedFromAdmin", groupId, userId);
+        }
+
+        public async Task GroupDeleted(int groupId, List<string> memberIds)
+        {
+            await Clients.Users(memberIds).SendAsync("OnGroupDeleted", groupId);
+        }
     }
 }

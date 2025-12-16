@@ -276,36 +276,38 @@ namespace RealtimeChat.Controllers
             if (!isAdmin)
                 return Forbid("Only admins can add members");
 
+            var uniqueUserIds = dto.UserIds.Distinct().ToList();
+            var existingUserIds = await _context.GroupMembers
+                .Where(gm => gm.GroupId == dto.GroupId)
+                .Select(gm => gm.UserId)
+                .ToListAsync();
+
             var addedMembers = new List<GroupMemberDto>();
 
-            foreach (var userId in dto.UserIds)
+            foreach (var userId in uniqueUserIds.Except(existingUserIds))
             {
-                var exists = await _context.GroupMembers
-                    .AnyAsync(gm => gm.GroupId == dto.GroupId && gm.UserId == userId);
+                var memberUser = await _userManager.FindByIdAsync(userId);
+                if (memberUser == null) continue;
 
-                if (!exists)
+                var member = new GroupMember
                 {
-                    var memberUser = await _userManager.FindByIdAsync(userId);
-                    if (memberUser != null)
-                    {
-                        var member = new GroupMember
-                        {
-                            GroupId = dto.GroupId,
-                            UserId = userId,
-                            UserName = memberUser.UserName ?? "",
-                            IsAdmin = false,
-                            JoinedAt = DateTime.UtcNow.AddHours(5.5)
-                        };
-                        _context.GroupMembers.Add(member);
-                        addedMembers.Add(new GroupMemberDto
-                        {
-                            UserId = userId,
-                            UserName = memberUser.UserName ?? "",
-                            IsAdmin = false,
-                            JoinedAt = member.JoinedAt
-                        });
-                    }
-                }
+                    GroupId = dto.GroupId,
+                    UserId = userId,
+                    UserName = memberUser.UserName ?? "",
+                    IsAdmin = false,
+                    JoinedAt = DateTime.UtcNow.AddHours(5.5)
+                };
+
+                _context.GroupMembers.Add(member);
+
+                addedMembers.Add(new GroupMemberDto
+                {
+                    UserId = userId,
+                    UserName = memberUser.UserName ?? "",
+                    ProfileImage = memberUser.ProfileImage,
+                    IsAdmin = false,
+                    JoinedAt = member.JoinedAt
+                });
             }
 
             await _context.SaveChangesAsync();
@@ -337,7 +339,36 @@ namespace RealtimeChat.Controllers
             _context.GroupMembers.Remove(member);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Member removed successfully" });
+            var remainingMembers = await _context.GroupMembers
+                .Where(gm => gm.GroupId == dto.GroupId)
+                .CountAsync();
+
+            if (remainingMembers == 0)
+            {
+                var group = await _context.ChatGroups
+                    .Include(g => g.Messages)
+                    .FirstOrDefaultAsync(g => g.Id == dto.GroupId);
+
+                if (group != null)
+                {
+                    _context.GroupMessages.RemoveRange(group.Messages);
+            
+                    _context.ChatGroups.Remove(group);
+            
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { 
+                        message = "Member removed successfully", 
+                        groupDeleted = true,
+                        groupId = dto.GroupId 
+                    });
+                }
+            }
+
+            return Ok(new { 
+                message = "Member removed successfully", 
+                groupDeleted = false 
+            });
         }
 
         [HttpGet("{groupId}/details")]
@@ -416,6 +447,80 @@ namespace RealtimeChat.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Member promoted to admin" });
+        }
+
+        [HttpPost("remove-admin")]
+        public async Task<IActionResult> RemoveAdmin([FromBody] MakeMemberAdminDto dto)
+        {
+            var currentUser = User.Identity?.Name;
+            if (string.IsNullOrEmpty(currentUser))
+                return Unauthorized();
+
+            var user = await _userManager.FindByNameAsync(currentUser);
+            if (user == null) return NotFound();
+
+            var isAdmin = await _context.GroupMembers
+                .AnyAsync(gm => gm.GroupId == dto.GroupId && gm.UserId == user.Id && gm.IsAdmin);
+
+            if (!isAdmin)
+                return Forbid("Only admins can demote members");
+
+            var member = await _context.GroupMembers
+                .FirstOrDefaultAsync(gm => gm.GroupId == dto.GroupId && gm.UserId == dto.UserId);
+
+            if (member == null)
+                return NotFound("Member not found");
+
+            if (!member.IsAdmin)
+                return BadRequest("Member is not an admin");
+
+            var adminCount = await _context.GroupMembers
+                .CountAsync(gm => gm.GroupId == dto.GroupId && gm.IsAdmin);
+
+            if (adminCount <= 1)
+                return BadRequest("Cannot remove the last admin. Please promote another member first.");
+
+            member.IsAdmin = false;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Admin privileges removed" });
+        }
+
+        [HttpDelete("delete/{groupId}")]
+        public async Task<IActionResult> DeleteGroup(int groupId)
+        {
+            var currentUser = User.Identity?.Name;
+            if (string.IsNullOrEmpty(currentUser))
+                return Unauthorized();
+
+            var user = await _userManager.FindByNameAsync(currentUser);
+            if (user == null) return NotFound();
+
+            var isAdmin = await _context.GroupMembers
+                .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == user.Id && gm.IsAdmin);
+
+            if (!isAdmin)
+                return Forbid("Only admins can delete groups");
+
+            var group = await _context.ChatGroups
+                .Include(g => g.Members)
+                .Include(g => g.Messages)
+                .FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (group == null)
+                return NotFound("Group not found");
+
+            var memberIds = group.Members.Select(m => m.UserId).ToList();
+
+            _context.GroupMessages.RemoveRange(group.Messages);
+
+            _context.GroupMembers.RemoveRange(group.Members);
+
+            _context.ChatGroups.Remove(group);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Group deleted successfully", memberIds });
         }
     }
 }
