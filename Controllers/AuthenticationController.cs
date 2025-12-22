@@ -298,9 +298,8 @@ namespace RealtimeChat.Controllers
 
             var newImageUrl = await _imageService.UploadImageAsync(modal.NewProfileImage);
 
-            // Optionally delete old image from storage if needed
             var publicId = GetPublicIdFromUrl(user.ProfileImage);
-             await _imageService.DeleteImageAsync(publicId, "image");
+            await _imageService.DeleteImageAsync(publicId, "image");
 
             user.ProfileImage = newImageUrl;
 

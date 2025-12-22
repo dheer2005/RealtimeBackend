@@ -6,6 +6,7 @@ using RealtimeChat.Context;
 using RealtimeChat.Dtos;
 using RealtimeChat.Models;
 using RealtimeChat.Services;
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -16,7 +17,7 @@ namespace RealtimeChat.Hubs
         private readonly UserManager<AppUser> _userManager;
         private readonly ChatDbContext _context;
         private readonly IMemoryCache _cache;
-        private static readonly Dictionary<string, OnlineUserDto> onlineUsers = new Dictionary<string, OnlineUserDto>();
+        private static readonly ConcurrentDictionary<string, OnlineUserDto> onlineUsers = new ConcurrentDictionary<string, OnlineUserDto>();
 
         public ChatHub(UserManager<AppUser> userManager, ChatDbContext context, IMemoryCache cache)
         {
@@ -52,13 +53,11 @@ namespace RealtimeChat.Hubs
                     onlineUsers.TryAdd(userName, onlineUser);
                 }
 
-                // Only notify others if user was actually offline before
                 if (!wasAlreadyOnline)
                 {
                     await Clients.Others.SendAsync("UserOnline", userName);
                 }
 
-                // Send the full list ONLY to the newly connected user
                 await Clients.Caller.SendAsync("OnlineUsers", await GetAllUsers());
             }
 
@@ -307,7 +306,6 @@ namespace RealtimeChat.Hubs
             {
                 if (onlineUsers.Remove(userName, out var removedUser))
                 {
-                    // Only notify others that this user went offline
                     await Clients.Others.SendAsync("UserOffline", userName);
                 }
             }

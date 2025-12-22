@@ -1,3 +1,4 @@
+using Instagram.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +20,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDbContext<ChatDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("chatString"));
+    options.AddInterceptors(new DbCallInterceptor());
 });
 
 
@@ -28,6 +30,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
 
 builder.Services.AddSingleton<IUserIdProvider, NameIdentifierUserIdProvider>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<DbCountFilter>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -87,7 +90,10 @@ builder.Services.AddAuthentication(options =>
 
  });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<DbCountFilter>();
+});
 
 builder.Services.AddEndpointsApiExplorer();
 

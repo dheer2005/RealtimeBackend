@@ -14,7 +14,6 @@ namespace RealtimeChat.Hubs
 
         private static readonly ConcurrentDictionary<string, string> _userConnections = new();
 
-        // Track active calls: Key = username, Value = who they're calling/in call with
         private static readonly ConcurrentDictionary<string, string> _activeCalls = new();
 
         public VideoChatHub(UserManager<AppUser> userManager, ChatDbContext context)
@@ -29,7 +28,6 @@ namespace RealtimeChat.Hubs
             if (!string.IsNullOrEmpty(userName))
             {
                 _userConnections[userName] = Context.ConnectionId;
-                Console.WriteLine($"📹 Video: User {userName} connected with ID {Context.ConnectionId}");
             }
             await base.OnConnectedAsync();
         }
@@ -41,7 +39,6 @@ namespace RealtimeChat.Hubs
             {
                 _userConnections.TryRemove(userName, out _);
 
-                // If user was in a call, notify the other party
                 if (_activeCalls.TryGetValue(userName, out var otherUser))
                 {
                     _activeCalls.TryRemove(userName, out _);
@@ -53,7 +50,6 @@ namespace RealtimeChat.Hubs
                     }
                 }
 
-                Console.WriteLine($"📹 Video: User {userName} disconnected");
             }
             await base.OnDisconnectedAsync(exception);
         }
@@ -69,55 +65,43 @@ namespace RealtimeChat.Hubs
         public async Task SendOffer(string toUser, string offer)
         {
             var fromUser = GetCurrentUserName();
-            Console.WriteLine($"📹 SendOffer: From {fromUser} to {toUser}");
 
-            // Check if caller is already in a call
             if (_activeCalls.ContainsKey(fromUser))
             {
                 await Clients.Caller.SendAsync("CallFailed", "You are already in a call");
                 return;
             }
 
-            // Check if recipient exists
             if (!_userConnections.TryGetValue(toUser, out var connectionId))
             {
-                Console.WriteLine($"❌ User {toUser} not found in video connections");
                 await Clients.Caller.SendAsync("CallFailed", "User is not available");
                 return;
             }
 
-            // Check if recipient is already in a call
             if (_activeCalls.ContainsKey(toUser))
             {
-                Console.WriteLine($"❌ User {toUser} is busy");
                 await Clients.Caller.SendAsync("CallFailed", "User is busy on another call");
                 return;
             }
 
-            // Mark both users as in a call
             _activeCalls[fromUser] = toUser;
             _activeCalls[toUser] = fromUser;
 
             await Clients.Client(connectionId).SendAsync("ReceiveOffer", fromUser, offer);
-            Console.WriteLine($"✅ Video offer sent to {toUser} at connection {connectionId}");
         }
 
         public async Task SendAnswer(string toUser, string answer)
         {
             var fromUser = GetCurrentUserName();
-            Console.WriteLine($"📹 SendAnswer: From {fromUser} to {toUser}");
 
-            // Verify both users are in the same call
             if (!_activeCalls.TryGetValue(fromUser, out var expectedUser) || expectedUser != toUser)
             {
-                Console.WriteLine($"❌ Invalid call state for answer from {fromUser} to {toUser}");
                 return;
             }
 
             if (_userConnections.TryGetValue(toUser, out var connectionId))
             {
                 await Clients.Client(connectionId).SendAsync("ReceiveAnswer", fromUser, answer);
-                Console.WriteLine($"✅ Video answer sent to {toUser}");
             }
             else
             {
@@ -128,12 +112,9 @@ namespace RealtimeChat.Hubs
         public async Task SendIceCandidate(string toUser, string candidate)
         {
             var fromUser = GetCurrentUserName();
-            Console.WriteLine($"📹 SendIceCandidate: From {fromUser} to {toUser}");
 
-            // Verify both users are in the same call
             if (!_activeCalls.TryGetValue(fromUser, out var expectedUser) || expectedUser != toUser)
             {
-                Console.WriteLine($"❌ Invalid call state for ICE candidate from {fromUser} to {toUser}");
                 return;
             }
 
@@ -151,9 +132,7 @@ namespace RealtimeChat.Hubs
         public async Task EndCall(string toUser)
         {
             var fromUser = GetCurrentUserName();
-            Console.WriteLine($"📹 EndCall: From {fromUser} to {toUser}");
 
-            // Remove call state for both users
             _activeCalls.TryRemove(fromUser, out _);
             _activeCalls.TryRemove(toUser, out _);
 
@@ -168,9 +147,7 @@ namespace RealtimeChat.Hubs
         public async Task DeclineCall(string fromUser)
         {
             var toUser = GetCurrentUserName();
-            Console.WriteLine($"📹 DeclineCall: {toUser} declining call from {fromUser}");
 
-            // Remove call state for both users
             _activeCalls.TryRemove(fromUser, out _);
             _activeCalls.TryRemove(toUser, out _);
 

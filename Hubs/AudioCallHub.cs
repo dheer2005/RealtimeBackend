@@ -49,8 +49,6 @@ namespace RealtimeChat.Hubs
                         await Clients.Client(otherConnectionId).SendAsync("CallEnded", userName);
                     }
                 }
-
-                Console.WriteLine($"🎤 Audio: User {userName} disconnected");
             }
             await base.OnDisconnectedAsync(exception);
         }
@@ -81,7 +79,6 @@ namespace RealtimeChat.Hubs
 
             if (_activeCalls.ContainsKey(toUser))
             {
-                Console.WriteLine($"❌ User {toUser} is busy");
                 await Clients.Caller.SendAsync("CallFailed", "User is busy on another call");
                 return;
             }
@@ -113,7 +110,6 @@ namespace RealtimeChat.Hubs
             // Verify both users are in the same call
             if (!_activeCalls.TryGetValue(fromUser, out var expectedUser) || expectedUser != toUser)
             {
-                Console.WriteLine($"❌ Invalid call state for answer from {fromUser} to {toUser}");
                 return;
             }
 
@@ -131,10 +127,8 @@ namespace RealtimeChat.Hubs
         {
             var fromUser = GetCurrentUserName();
 
-            // Verify both users are in the same call
             if (!_activeCalls.TryGetValue(fromUser, out var expectedUser) || expectedUser != toUser)
             {
-                Console.WriteLine($"❌ Invalid call state for ICE candidate from {fromUser} to {toUser}");
                 return;
             }
 
@@ -168,7 +162,6 @@ namespace RealtimeChat.Hubs
         {
             var toUser = GetCurrentUserName();
 
-            // Remove call state for both users
             _activeCalls.TryRemove(fromUser, out _);
             _activeCalls.TryRemove(toUser, out _);
 
